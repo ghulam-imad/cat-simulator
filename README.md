@@ -3,7 +3,7 @@
 A small practice tool for a child preparing for a Computerized Adaptive Test (CAT).
 The Parent writes Exercise Sets as Markdown files. The Student logs in with their name and an Exercise Set number and works through timed, adaptive multiple-choice Subjects. Every answer, tick, timing and interruption is logged so Parent and Student can review the Attempt together afterwards.
 
-Everything runs on one home computer. There's no cloud and no accounts.
+Everything runs on one home computer and is reachable only from devices on the home Wi-Fi. There's no cloud and no accounts.
 
 > **Status:** the Attempt engine, the Exercise Set loader and the server API are built and tested, and `npm start` runs the server.
 > Still to come: the Student and Parent screens, and an example Exercise Set. Until then, the server only answers API requests.
@@ -21,7 +21,20 @@ cp cat-simulator.config.example.json cat-simulator.config.json
 npm start
 ```
 
-Then open http://localhost:3000. The server only listens on this computer.
+At start-up it prints the addresses to open, for example:
+
+```
+CAT Simulator running
+  On this computer: http://localhost:3000
+  On the home Wi-Fi: http://10.10.50.12:3000  (wlp0s20f3)
+  Allowed devices: this computer, 10.10.50.0/24
+```
+
+On the Student's tablet or your laptop, open the "home Wi-Fi" address. The address can change if the router hands out a new one, so check the start-up output if it stops working.
+
+**Who can connect:** only this computer and devices whose address is in `allowedNetworks`. Anything else, such as a VPN or another network, gets "Not allowed". Anyone on the home Wi-Fi can open the Student pages. The Parent review needs the PIN. This is built for a trusted home network, not the internet: there's no HTTPS and no Student passwords.
+
+If another device can't connect even though it's on the Wi-Fi, this computer's firewall may be blocking the port. For example, with `ufw`: `sudo ufw allow from 10.10.50.0/24 to any port 3000 proto tcp`.
 
 `cat-simulator.config.json` (kept out of git because it holds the PIN):
 
@@ -32,6 +45,8 @@ Then open http://localhost:3000. The server only listens on this computer.
 | `setsDir` | Folder holding the Exercise Sets | `sets` |
 | `dbPath` | SQLite file where every Attempt is logged | `cat.sqlite` |
 | `port` | Port to serve on | `3000` |
+| `host` | `0.0.0.0` accepts other devices; `127.0.0.1` accepts this computer only | `0.0.0.0` |
+| `allowedNetworks` | Networks other devices may connect from, e.g. `["10.10.50.0/24"]` for every `10.10.50.x` address. This computer is always allowed. | `[]` (this computer only) |
 
 ## How a practice run works
 

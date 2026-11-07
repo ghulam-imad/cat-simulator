@@ -3,5 +3,7 @@
   "parentPin": "change-me",
   "setsDir": "sets",
   "dbPath": "cat.sqlite",
-  "port": 3000
+  "port": 3000,
+  "host": "0.0.0.0",
+  "allowedNetworks": ["10.10.50.0/24"]
 }
