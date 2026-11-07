@@ -7,6 +7,7 @@ const subject = (name: string, workMinutes: number, leadMinutes: number, lagMinu
   workMinutes,
   leadMinutes,
   lagMinutes,
+  questionCount: 0,
   questions: [],
 });
 

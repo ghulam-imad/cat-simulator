@@ -1,6 +1,7 @@
 # Kemampuan Kuantitatif (Numerasi)
 work: 27 min
 lag: 5 min
+questions: 18
 
 ## difficulty: high · ASLI 1.10
 Jumlah umur Ayah dan anaknya sekarang adalah 48 tahun. Empat tahun lagi, umur Ayah akan menjadi 3 kali umur anaknya. Umur anak sekarang adalah ....
@@ -29,6 +30,14 @@ Bilangan berikutnya adalah ....
 - [ ] 97
 - [x] 95
 - [ ] 89
+
+## difficulty: high · ASLI 1.5
+Sebuah tangki terisi 3/5 bagian. Setelah ditambahkan 24 liter air, tangki menjadi terisi 9/10 bagian. Kapasitas tangki tersebut adalah ....
+
+- [ ] 72 liter
+- [ ] 60 liter
+- [x] 80 liter
+- [ ] 90 liter
 
 ## difficulty: high · ASLI 1.6
 Rata-rata nilai 5 siswa adalah 78. Setelah nilai seorang siswa baru dimasukkan, rata-rata 6 siswa menjadi 80. Nilai siswa baru tersebut adalah ....
@@ -98,6 +107,22 @@ Uang A dan B berbanding 3 : 5 dengan jumlah Rp160.000. Agar uang mereka sama ban
 - [ ] Rp10.000
 - [x] Rp20.000
 
+## difficulty: high · NUM-SL07
+Keliling sebuah persegi panjang 36 cm. Panjangnya 2 kali lebarnya. Luas persegi panjang tersebut adalah ....
+
+- [ ] 81 cm²
+- [x] 72 cm²
+- [ ] 36 cm²
+- [ ] 48 cm²
+
+## difficulty: high · NUM-SL08
+Sebuah bilangan dua angka memiliki jumlah angka 11. Angka puluhannya 3 lebih besar daripada angka satuannya. Bilangan tersebut adalah ....
+
+- [ ] 47
+- [ ] 83
+- [x] 74
+- [ ] 65
+
 ## difficulty: high · NUM-SL09
 Luas setengah lingkaran dengan jari-jari 14 cm adalah .... (π = 22/7)
 
@@ -106,6 +131,14 @@ Luas setengah lingkaran dengan jari-jari 14 cm adalah .... (π = 22/7)
 - [ ] 88 cm²
 - [x] 308 cm²
 
+## difficulty: high · NUM-SL10
+Uang Rp150.000 dibagikan kepada A, B, dan C dengan perbandingan 2 : 3 : 5. Selisih uang C dan A adalah ....
+
+- [x] Rp45.000
+- [ ] Rp30.000
+- [ ] Rp75.000
+- [ ] Rp15.000
+
 ## difficulty: high · NUM-SL11
 Sebuah toko memberi diskon 25%, lalu diskon tambahan 10% dari harga setelah diskon pertama. Harga awal barang Rp200.000. Harga akhirnya adalah ....
 
@@ -113,6 +146,14 @@ Sebuah toko memberi diskon 25%, lalu diskon tambahan 10% dari harga setelah disk
 - [ ] Rp140.000
 - [x] Rp135.000
 - [ ] Rp65.000
+
+## difficulty: high · NUM-SL12
+Tiga orang dapat mengecat pagar dalam 12 hari. Setelah bekerja 4 hari, datang 1 orang lagi membantu. Pagar selesai dicat dalam waktu total ....
+
+- [x] 10 hari
+- [ ] 9 hari
+- [ ] 8 hari
+- [ ] 12 hari
 
 ## difficulty: high · NUM-SL13
 Perhatikan pola berikut:
@@ -157,6 +198,22 @@ Lima tahun yang lalu umur ayah 7 kali umur anaknya. Lima tahun yang akan datang 
 - [ ] 8 tahun
 - [ ] 12 tahun
 - [ ] 15 tahun
+
+## difficulty: high · NUM-SL18
+Dari angka 1, 2, 3, dan 4 akan dibuat bilangan dua angka dengan angka yang berbeda. Banyak bilangan genap yang dapat dibuat adalah ....
+
+- [ ] 8
+- [x] 6
+- [ ] 12
+- [ ] 4
+
+## difficulty: medium · ASLI 1.2
+Sebuah persegi panjang memiliki panjang 18 cm dan lebar 12 cm. Sebuah persegi dengan sisi 6 cm dipotong dari bagian tersebut. Luas yang tersisa adalah ....
+
+- [x] 180 cm²
+- [ ] 192 cm²
+- [ ] 168 cm²
+- [ ] 204 cm²
 
 ## difficulty: medium · ASLI 1.8
 Sebuah kantin menyediakan 3 jenis makanan dan 4 jenis minuman. Seorang siswa memilih tepat satu makanan dan satu minuman. Banyak kombinasi pilihan yang mungkin adalah ....
@@ -298,6 +355,14 @@ Pada pukul 03.00, besar sudut terkecil yang dibentuk jarum jam dan jarum menit a
 - [x] 90°
 - [ ] 180°
 
+## difficulty: medium · NUM-SD16
+Dari 40 siswa, 25 siswa suka matematika, 18 siswa suka IPA, dan 8 siswa suka keduanya. Banyak siswa yang tidak suka keduanya adalah ....
+
+- [x] 5
+- [ ] 3
+- [ ] 8
+- [ ] 13
+
 ## difficulty: medium · NUM-SD17
 Kecepatan 72 km/jam sama dengan .... m/detik.
 
@@ -306,6 +371,14 @@ Kecepatan 72 km/jam sama dengan .... m/detik.
 - [ ] 36
 - [x] 20
 
+## difficulty: medium · NUM-SD18
+Hasil dari √144 + √81 adalah ....
+
+- [ ] 15
+- [x] 21
+- [ ] 23
+- [ ] 225
+
 ## difficulty: low · ASLI 1.1
 Sebuah sepeda menempuh jarak 36 km dalam waktu 3 jam. Kecepatan rata-ratanya adalah ....
 
@@ -313,6 +386,14 @@ Sebuah sepeda menempuh jarak 36 km dalam waktu 3 jam. Kecepatan rata-ratanya ada
 - [x] 12 km/jam
 - [ ] 18 km/jam
 - [ ] 15 km/jam
+
+## difficulty: low · ASLI 1.11
+Sebuah film dimulai pukul 08.45 dan berlangsung selama 1 jam 35 menit. Film selesai pada pukul ....
+
+- [x] 10.20
+- [ ] 10.10
+- [ ] 10.40
+- [ ] 10.30
 
 ## difficulty: low · ASLI 1.12
 Perhatikan pola berikut:
@@ -334,6 +415,14 @@ Nilai ulangan Dika adalah 70, 80, 75, 85, dan 90. Rata-ratanya adalah ....
 - [ ] 85
 - [ ] 79
 
+## difficulty: low · NUM-M01
+Ibu membeli 3 kg apel dengan harga Rp24.000 per kg. Ibu membayar dengan uang Rp100.000. Uang kembalian yang diterima Ibu adalah ....
+
+- [ ] Rp18.000
+- [ ] Rp32.000
+- [x] Rp28.000
+- [ ] Rp38.000
+
 ## difficulty: low · NUM-M02
 Sebuah bus berangkat pukul 06.50 dan tiba di tujuan pukul 09.15. Lama perjalanan bus tersebut adalah ....
 
@@ -341,6 +430,18 @@ Sebuah bus berangkat pukul 06.50 dan tiba di tujuan pukul 09.15. Lama perjalanan
 - [x] 2 jam 25 menit
 - [ ] 3 jam 25 menit
 - [ ] 2 jam 15 menit
+
+## difficulty: low · NUM-M03
+Perhatikan pola berikut:
+
+5, 9, 13, 17, ...
+
+Bilangan berikutnya adalah ....
+
+- [ ] 20
+- [ ] 22
+- [ ] 25
+- [x] 21
 
 ## difficulty: low · NUM-M04
 Rata-rata dari 6, 8, 7, 9, dan 10 adalah ....
@@ -405,6 +506,14 @@ KPK dari 6 dan 8 adalah ....
 - [x] 24
 - [ ] 12
 - [ ] 14
+
+## difficulty: low · NUM-M12
+FPB dari 12 dan 18 adalah ....
+
+- [ ] 3
+- [ ] 36
+- [ ] 9
+- [x] 6
 
 ## difficulty: low · NUM-M13
 Volume kubus dengan panjang rusuk 5 cm adalah ....

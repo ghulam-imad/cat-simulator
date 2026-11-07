@@ -47,10 +47,21 @@ function harness(opts: { random?: () => number } = {}) {
     });
     return { status: res.status, body: (await res.json()) as any };
   };
+  /** Where Option `text` is on the Student's screen right now. */
+  const positionOf = async (attemptId: string, text: string) => {
+    const { body } = await call("POST", `/api/attempts/${attemptId}/heartbeat`);
+    return body.view.kind === "question" ? (body.view.question.options as string[]).indexOf(text) : 0;
+  };
   return {
     setsDir,
     clock,
     call,
+    /** Submits Option `text` as the Response. In these sets "a" is always right and "b" wrong. */
+    answer: async (attemptId: string, text: string) =>
+      call("POST", `/api/attempts/${attemptId}/responses`, { selected: [await positionOf(attemptId, text)] }),
+    /** Ticks just Option `text`. */
+    select: async (attemptId: string, text: string) =>
+      call("POST", `/api/attempts/${attemptId}/selection`, { selected: [await positionOf(attemptId, text)] }),
     /** A plain GET, for non-JSON replies such as images. */
     get: (path: string) => app.request(path),
     restart: (random?: () => number) => {
@@ -70,7 +81,7 @@ describe("Student", () => {
       kind: "question",
       subject: "Math",
       question: {
-        text: "Math question 3 (medium)",
+        text: "Math question 5 (low)",
         options: ["a", "b", "c", "d"],
         multiAnswer: false,
       },
@@ -83,27 +94,27 @@ describe("Student", () => {
   });
 
   test("submitting a Response moves on to the next Question", async () => {
-    const { call, clock } = harness();
+    const { call, clock, answer } = harness();
     const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
 
     clock.now = minute(1);
-    const res = await call("POST", `/api/attempts/${body.attemptId}/responses`, { selected: [0] });
+    const res = await answer(body.attemptId, "a");
 
-    expect(res.body.view).toMatchObject({ kind: "question", question: { text: "Math question 1 (high)" } });
+    expect(res.body.view).toMatchObject({ kind: "question", question: { text: "Math question 3 (medium)" } });
   });
 
   test("after a restart, logging in again resumes the same Attempt at the same Question", async () => {
-    const { call, clock, restart } = harness({ random: () => 0.99 }); // draws the last Question in each Pool
+    const { call, clock, restart, answer } = harness({ random: () => 0.99 }); // draws the last Question in each Pool
     const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${started.body.attemptId}/responses`, { selected: [0] });
+    await answer(started.body.attemptId, "a");
 
     restart(() => 0); // would draw different Questions if the saved draws weren't replayed
     clock.now = minute(2);
     const resumed = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
 
     expect(resumed.body.attemptId).toBe(started.body.attemptId);
-    expect(resumed.body.view).toMatchObject({ question: { text: "Math question 2 (high)" } });
+    expect(resumed.body.view).toMatchObject({ question: { text: "Math question 4 (medium)" } });
   });
 
   test("ticked Options are kept, so reopening shows them still ticked", async () => {
@@ -147,13 +158,13 @@ describe("Student", () => {
   });
 
   test("a Response sent while waiting for the next Subject is refused, not saved", async () => {
-    const { call, clock } = harness();
+    const { call, clock, answer } = harness();
     const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${body.attemptId}/responses`, { selected: [0] });
-    await call("POST", `/api/attempts/${body.attemptId}/responses`, { selected: [0] }); // Math done; English opens at 15
+    await answer(body.attemptId, "a");
+    await answer(body.attemptId, "a"); // Math done; English opens at 15
 
-    const refused = await call("POST", `/api/attempts/${body.attemptId}/responses`, { selected: [0] });
+    const refused = await answer(body.attemptId, "a");
     clock.now = minute(15);
     const english = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
 
@@ -246,6 +257,18 @@ describe("Start screen", () => {
     expect(after.body.inProgress).toEqual({ subjects: ["Math", "English"] });
   });
 
+  test("shows how many Questions each Subject asks, even when its Pools hold more", async () => {
+    const { call, setsDir } = harness();
+    const folder = join(setsDir, "bank");
+    mkdirSync(folder);
+    const pool = (d: string) => [1, 2, 3].map((i) => `## difficulty: ${d}\nQ${i}\n\n- [x] a\n- [ ] b\n- [ ] c\n- [ ] d\n`).join("\n");
+    writeFileSync(join(folder, "1-math.md"), `# Math\nwork: 10 min\nquestions: 2\n\n${pool("high")}\n${pool("medium")}\n${pool("low")}`);
+
+    const res = await call("GET", "/api/sets/bank?student=Aisha");
+
+    expect(res.body.subjects).toEqual([{ name: "Math", workMinutes: 10, leadMinutes: 0, lagMinutes: 0, questionCount: 2 }]);
+  });
+
   test("an unknown Exercise Set number is reported before starting", async () => {
     const { call } = harness();
 
@@ -317,10 +340,10 @@ describe("Parent", () => {
   });
 
   test("lists every Attempt, newest first, with its status and Scores", async () => {
-    const { call, clock } = harness();
+    const { call, clock, answer } = harness();
     const aisha = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${aisha.body.attemptId}/responses`, { selected: [0] }); // Medium, right: 2
+    await answer(aisha.body.attemptId, "a"); // Low, right: 1
     clock.now = minute(2);
     const omar = await call("POST", "/api/attempts", { student: "Omar", setNumber: "7" });
 
@@ -347,10 +370,10 @@ describe("Parent", () => {
         setNumber: "7",
         startedAt: T0,
         status: "finished",
-        score: 2,
+        score: 1,
         skippedSubjects: [],
         subjects: [
-          { subject: "Math", score: 2, correct: 1 },
+          { subject: "Math", score: 1, correct: 1 },
           { subject: "English", score: 0, correct: 0 },
         ],
       },
@@ -358,12 +381,12 @@ describe("Parent", () => {
   });
 
   test("opening an Attempt shows every Response in detail, with the Correct Options", async () => {
-    const { call, clock } = harness();
+    const { call, clock, answer, select } = harness();
     const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${body.attemptId}/selection`, { selected: [1] });
+    await select(body.attemptId, "b");
     clock.now = minute(2);
-    await call("POST", `/api/attempts/${body.attemptId}/responses`, { selected: [1] }); // Medium, wrong
+    await answer(body.attemptId, "b"); // Low, wrong
 
     const res = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
 
@@ -371,10 +394,10 @@ describe("Parent", () => {
     expect(res.body.subjects[0]).toMatchObject({
       subject: "Math",
       timedOut: false,
-      difficultyPath: ["medium"],
+      difficultyPath: ["low"],
       responses: [
         {
-          question: { text: "Math question 3 (medium)", options: ["a", "b", "c", "d"], correctOptions: [0] },
+          question: { text: "Math question 5 (low)", options: ["a", "b", "c", "d"], correctOptions: [0] },
           selected: [1],
           correct: false,
           points: 0,
@@ -461,7 +484,7 @@ describe("Selected Subjects", () => {
   const PIN = { "x-parent-pin": "4321" };
 
   test("an Attempt can run only some Subjects, in the set's order, on a clock of just their Work Times", async () => {
-    const { call, clock, setsDir } = harness();
+    const { call, clock, setsDir, answer } = harness();
     addSet8(setsDir);
 
     const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["English", "Math"] });
@@ -471,8 +494,8 @@ describe("Selected Subjects", () => {
     });
 
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${started.body.attemptId}/responses`, { selected: [0] });
-    const afterMath = await call("POST", `/api/attempts/${started.body.attemptId}/responses`, { selected: [0] });
+    await answer(started.body.attemptId, "a");
+    const afterMath = await answer(started.body.attemptId, "a");
     expect(afterMath.body.view).toEqual({ kind: "waiting", nextSubject: "English", opensAt: minute(15) });
   });
 
@@ -502,11 +525,11 @@ describe("Selected Subjects", () => {
   });
 
   test("the Parent sees which Subjects an Attempt skipped, and Scores for only the ones it ran", async () => {
-    const { call, setsDir, clock } = harness();
+    const { call, setsDir, clock, answer } = harness();
     addSet8(setsDir);
     const partial = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["Math", "English"] });
     clock.now = minute(1);
-    await call("POST", `/api/attempts/${partial.body.attemptId}/responses`, { selected: [0] });
+    await answer(partial.body.attemptId, "a");
     const whole = await call("POST", "/api/attempts", { student: "Omar", setNumber: "8", subjects: ["Math", "Science", "English"] });
 
     const list = await call("GET", "/api/parent/attempts", undefined, PIN);
@@ -517,9 +540,9 @@ describe("Selected Subjects", () => {
       {
         attemptId: partial.body.attemptId,
         skippedSubjects: ["Science"],
-        score: 2,
+        score: 1,
         subjects: [
-          { subject: "Math", score: 2, correct: 1 },
+          { subject: "Math", score: 1, correct: 1 },
           { subject: "English", score: 0, correct: 0 },
         ],
       },

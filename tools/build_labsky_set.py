@@ -1,25 +1,22 @@
-"""Builds the labsky-001 ... labsky-005 Exercise Sets from the Labsky question bank.
+"""Builds the "labsky" Exercise Set from the Labsky question bank.
 
-    python3 tools/build_labsky_sets.py <Bank_Soal_CAT_Labsky_2026_Asli_dan_Latihan.md> sets
+    python3 tools/build_labsky_set.py <Bank_Soal_CAT_Labsky_2026_Asli_dan_Latihan.md> sets
 
 - Text is copied verbatim from the bank (no translation); pembahasan is left out.
 - 🟨 LATIHAN questions keep the bank's level: M -> low, SD -> medium, SL -> high.
 - 🟦 ASLI questions have no level in the bank; ASLI_LEVEL below assigns one, judged against
   the LATIHAN questions of each level.
-- Each Pool of each set is drawn at random from that level's LATIHAN + ASLI questions,
-  preferring questions used least in earlier sets, so every question gets used across the
-  five sets. Questions may repeat across sets, never within one.
-- A fixed seed makes the output reproducible.
+- Every question of the bank goes into its Subject's Pool for its level. Each Subject asks
+  fewer Questions than its Pools hold ("questions: N"), and the app draws them at random,
+  so every run gets a different mix.
 """
-import random
 import re
 import sys
 from pathlib import Path
 
-SEED = "labsky-2026"
-SET_NAMES = [f"labsky-{n:03d}" for n in range(1, 6)]
+SET_NAME = "labsky"
 
-# (file, title as in the bank, LATIHAN code prefix, ASLI tahap, questions per Pool, timing lines)
+# (file, title as in the bank, LATIHAN code prefix, ASLI tahap, questions asked, timing lines)
 SUBJECTS = [
     ("1-kuantitatif.md", "Kemampuan Kuantitatif (Numerasi)", "NUM", 1, 18, ["work: 27 min", "lag: 5 min"]),
     ("2-literasi.md", "Pemahaman Membaca (Literasi)", "LIT", 2, 20, ["lead: 15 min", "work: 25 min", "lag: 5 min"]),
@@ -86,33 +83,27 @@ def read_bank(path):
 
 def main(bank_path, sets_dir):
     questions, keys = read_bank(bank_path)
-    rng = random.Random(SEED)
-    used = {q[0]: 0 for q in questions}
-    for set_name in SET_NAMES:
-        out = Path(sets_dir) / set_name
-        out.mkdir(parents=True, exist_ok=True)
-        summary = []
-        for file_name, title, prefix, tahap, per_pool, timing in SUBJECTS:
-            parts = [f"# {title}", *timing, ""]
-            asli_count = 0
-            for level in ["high", "medium", "low"]:
-                candidates = [q for q in questions if q[1] in (prefix, tahap) and q[2] == level]
-                rng.shuffle(candidates)
-                candidates.sort(key=lambda q: used[q[0]])  # stable: least used first, random among ties
-                chosen = sorted(candidates[:per_pool], key=lambda q: q[0])
-                assert len(chosen) == per_pool, (set_name, title, level, len(candidates))
-                for code, _, _, text, options in chosen:
-                    used[code] += 1
-                    asli_count += code.startswith("ASLI")
-                    answer = "ABCD".index(keys[code])
-                    parts += [f"## difficulty: {level} · {code}", text, ""]
-                    parts += [f"- [{'x' if i == answer else ' '}] {opt}" for i, opt in enumerate(options)]
-                    parts.append("")
-            (out / file_name).write_text("\n".join(parts), encoding="utf-8")
-            summary.append(f"{title.split(' (')[0]}: {asli_count} ASLI of {per_pool * 3}")
-        print(f"{set_name}: " + "; ".join(summary))
-    never = [c for c, n in used.items() if n == 0]
-    print(f"questions in bank: {len(questions)}, never used: {never or 'none'}")
+    out = Path(sets_dir) / SET_NAME
+    out.mkdir(parents=True, exist_ok=True)
+    written = 0
+    for file_name, title, prefix, tahap, asked, timing in SUBJECTS:
+        parts = [f"# {title}", *timing, f"questions: {asked}", ""]
+        sizes = []
+        for level in ["high", "medium", "low"]:
+            pool = sorted((q for q in questions if q[1] in (prefix, tahap) and q[2] == level), key=lambda q: q[0])
+            # Every Pool must hold at least as many as are asked: an all-Low or all-High run never runs dry.
+            assert len(pool) >= asked, (title, level, len(pool), asked)
+            sizes.append(f"{len(pool)} {level} ({sum(q[0].startswith('ASLI') for q in pool)} ASLI)")
+            for code, _, _, text, options in pool:
+                answer = "ABCD".index(keys[code])
+                parts += [f"## difficulty: {level} · {code}", text, ""]
+                parts += [f"- [{'x' if i == answer else ' '}] {opt}" for i, opt in enumerate(options)]
+                parts.append("")
+                written += 1
+        (out / file_name).write_text("\n".join(parts), encoding="utf-8")
+        print(f"{title}: asks {asked} of " + ", ".join(sizes))
+    assert written == len(questions), (written, len(questions))
+    print(f"{SET_NAME}: all {written} questions of the bank")
 
 
 if __name__ == "__main__":

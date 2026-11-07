@@ -2,6 +2,17 @@
 lead: 15 min
 work: 25 min
 lag: 5 min
+questions: 20
+
+## difficulty: high · ASLI 2.3
+Setelah perpustakaan memperpanjang jam layanan hingga pukul 16.00, jumlah siswa yang meminjam buku meningkat. Namun, peningkatan tersebut juga terjadi setelah sekolah membuat program rekomendasi buku mingguan.
+
+Kesimpulan paling hati-hati adalah ...
+
+- [ ] peningkatan peminjaman pasti hanya disebabkan jam layanan
+- [ ] program rekomendasi tidak berpengaruh
+- [ ] jam layanan pasti tidak berpengaruh
+- [x] kedua perubahan tersebut mungkin berkontribusi terhadap peningkatan peminjaman
 
 ## difficulty: high · ASLI 2.6
 A school survey found that students who read for at least 20 minutes a day tended to have higher reading scores. However, the survey did not determine whether reading caused the higher scores.
@@ -95,6 +106,16 @@ Pernyataan yang paling melemahkan kesimpulan tersebut adalah ...
 - [x] pada periode yang sama, kelas A juga mendapat tambahan jam les
 - [ ] aplikasi itu dapat diunduh gratis
 
+## difficulty: high · LIT-SL07
+Maria said, "I'd love to come to your party, but I have a piano exam the next morning."
+
+What does Maria most likely mean?
+
+- [ ] She will definitely come.
+- [ ] She does not like piano.
+- [x] She probably will not come to the party.
+- [ ] The party is in the morning.
+
 ## difficulty: high · LIT-SL08
 "Meskipun timnya kalah, sang kapten tetap legawa menerima hasil pertandingan."
 
@@ -178,6 +199,26 @@ Kalimat yang tidak padu adalah ...
 - [ ] kalimat (4)
 - [x] kalimat (3)
 
+## difficulty: high · LIT-SL16
+The number of visitors to the beach doubled after a new road opened. At the same time, the beach was featured in a popular travel video.
+
+What is the most careful conclusion?
+
+- [ ] Only the road increased visitors.
+- [ ] The video had no effect.
+- [ ] The number of visitors decreased.
+- [x] Both the road and the video may have increased visitors.
+
+## difficulty: high · LIT-SL17
+Saat mengambil rapor, Ibu tersenyum lebar dan memeluk Aldi.
+
+Hal yang paling mungkin adalah ...
+
+- [ ] Aldi tidak naik kelas
+- [ ] Ibu lupa mengambil rapor
+- [ ] rapor Aldi hilang
+- [x] hasil belajar Aldi memuaskan
+
 ## difficulty: high · LIT-SL18
 Some students say homework is useless. Yet a survey at our school showed that students who completed homework regularly scored higher on tests.
 
@@ -205,6 +246,36 @@ What do supporters and critics disagree about?
 - [ ] Whether restaurants should exist
 - [ ] Whether calories are real
 - [ ] Whether food should be free
+
+## difficulty: medium · ASLI 2.10
+Setelah berdiskusi cukup lama, akhirnya mereka menemukan jalan tengah untuk menyelesaikan masalah tersebut.
+
+Makna "jalan tengah" dalam kalimat tersebut adalah ...
+
+- [ ] jalan yang berada di tengah kota
+- [x] solusi yang dapat diterima pihak-pihak yang berbeda
+- [ ] keputusan yang menguntungkan satu pihak
+- [ ] perjalanan menuju suatu tempat
+
+## difficulty: medium · ASLI 2.17
+Dina membawa payung sebelum berangkat sekolah. Ketika pulang, hujan turun dengan deras.
+
+Simpulan yang paling tepat adalah ...
+
+- [ ] Dina sengaja menunggu hujan
+- [ ] Dina tidak suka hujan
+- [ ] Dina tidak berangkat sekolah
+- [x] Dina sudah mengantisipasi kemungkinan hujan
+
+## difficulty: medium · ASLI 2.2
+Maya usually walks to school. One morning, she left home earlier than usual and carried a raincoat. When she arrived at school, her shoes were wet.
+
+What can be reasonably inferred?
+
+- [ ] Maya went swimming before school.
+- [x] It probably rained while she was going to school.
+- [ ] Maya forgot where her school was.
+- [ ] Maya did not leave home.
 
 ## difficulty: medium · ASLI 2.4
 Dalam sebuah survei terhadap 100 siswa, 60 siswa memilih bersepeda ke sekolah jika tersedia jalur sepeda yang aman. Sebanyak 25 siswa memilih berjalan kaki, sedangkan sisanya memilih kendaraan lain.
@@ -324,6 +395,16 @@ Penyebab yang paling mungkin adalah ...
 - [ ] ikan kekurangan cahaya lampu
 - [x] kualitas air kolam memburuk
 
+## difficulty: medium · LIT-SD10
+Some animals sleep for a long time during winter. This helps them save energy when food is hard to find.
+
+Why do some animals sleep during winter?
+
+- [x] To save energy when food is scarce.
+- [ ] Because they like cold weather.
+- [ ] To find more food.
+- [ ] Because winter is short.
+
 ## difficulty: medium · LIT-SD11
 Olahraga teratur membuat tubuh lebih bugar. Selain itu, olahraga dapat mengurangi stres. Olahraga juga membantu kita tidur lebih nyenyak.
 
@@ -344,6 +425,16 @@ Which word best describes Mira?
 - [ ] lazy
 - [ ] noisy
 
+## difficulty: medium · LIT-SD13
+Iklan toko: "Diskon 50% untuk pembelian baju kedua!" Satu baju harganya Rp100.000.
+
+Jika membeli 2 baju, jumlah yang harus dibayar adalah ...
+
+- [ ] Rp100.000
+- [ ] Rp200.000
+- [x] Rp150.000
+- [ ] Rp50.000
+
 ## difficulty: medium · LIT-SD14
 Pada awalnya, warga menolak pembangunan taman kota. Setelah taman selesai, warga justru sering berolahraga di sana.
 
@@ -363,6 +454,16 @@ What was the effect of closing the bridge?
 - [ ] Drivers stayed at home.
 - [x] Drivers traveled a longer way.
 - [ ] Traffic disappeared.
+
+## difficulty: medium · LIT-SD16
+"Petani mengantisipasi musim kemarau dengan membuat embung."
+
+Makna kata "mengantisipasi" adalah ...
+
+- [ ] menolak
+- [x] menyiapkan diri menghadapi
+- [ ] menikmati
+- [ ] melupakan
 
 ## difficulty: medium · LIT-SD17
 Survei menunjukkan 70% siswa membaca kurang dari 15 menit per hari.
@@ -409,6 +510,36 @@ Akibat yang paling mungkin adalah ...
 - [x] Doni tidak dapat mengumpulkan tugas tepat waktu
 - [ ] semua temannya juga lupa
 
+## difficulty: low · ASLI 2.1
+Sebuah artikel menyebutkan bahwa tidur cukup dapat membantu seseorang berkonsentrasi. Artikel tersebut juga menjelaskan bahwa kurang tidur dapat membuat seseorang lebih mudah lelah.
+
+Pernyataan yang paling sesuai dengan teks adalah ...
+
+- [ ] tidur tidak berhubungan dengan konsentrasi
+- [x] tidur yang cukup dapat mendukung kemampuan berkonsentrasi
+- [ ] semakin sedikit tidur, semakin baik konsentrasi
+- [ ] semua orang harus tidur pada waktu yang sama
+
+## difficulty: low · ASLI 2.11
+Sekolah mulai menerapkan program membawa botol minum sendiri. Program ini bertujuan mengurangi penggunaan botol plastik sekali pakai.
+
+Manfaat utama program tersebut adalah ...
+
+- [ ] membuat siswa membeli lebih banyak minuman
+- [ ] meningkatkan penggunaan plastik
+- [x] mengurangi sampah plastik
+- [ ] mengurangi jumlah siswa
+
+## difficulty: low · ASLI 2.12
+Many students enjoy reading digital books because they can carry hundreds of books on one device. Digital books can also be accessed easily at any time.
+
+What is the main idea?
+
+- [ ] Students only read at school.
+- [ ] Digital books are always expensive.
+- [ ] Students cannot read printed books.
+- [x] Digital books are convenient for students.
+
 ## difficulty: low · ASLI 2.13
 Tom studied hard for his science test. He reviewed his notes and practiced several questions. The next day, he felt confident when taking the test.
 
@@ -440,6 +571,16 @@ The word "slippery" means ...
 - [ ] easy to walk on
 - [x] easy to slide on
 - [ ] difficult to see
+
+## difficulty: low · ASLI 2.16
+Sarah brought an umbrella when she left home. The sky was dark and several clouds were moving quickly.
+
+Why did Sarah probably bring an umbrella?
+
+- [x] She expected rain.
+- [ ] She wanted to play with it.
+- [ ] She wanted to buy one.
+- [ ] She was going swimming.
 
 ## difficulty: low · LIT-M01
 Rina selalu menyiram tanaman di halaman rumahnya setiap pagi. Karena itu, bunga-bunga di halaman tumbuh subur.
@@ -499,6 +640,16 @@ Makna kata "lezat" dalam kalimat "Masakan Ibu sangat lezat" adalah ...
 - [ ] sedikit
 - [x] enak
 
+## difficulty: low · LIT-M07
+Perpustakaan sekolah buka hari Senin–Jumat pukul 07.00–15.00. Dodi ingin meminjam buku pada hari Sabtu.
+
+Pernyataan yang tepat adalah ...
+
+- [ ] Dodi bisa meminjam pukul 07.00
+- [x] Dodi tidak bisa meminjam karena perpustakaan tutup
+- [ ] Dodi bisa meminjam sepanjang hari
+- [ ] Dodi bisa meminjam setelah pukul 15.00
+
 ## difficulty: low · LIT-M08
 The museum is closed on Mondays.
 
@@ -508,6 +659,16 @@ Which statement is true?
 - [ ] The museum is open every day.
 - [ ] The museum only opens on Monday.
 - [ ] Monday is a holiday for everyone.
+
+## difficulty: low · LIT-M09
+Pak Budi menanam pohon mangga di depan rumahnya. Lima tahun kemudian, pohon itu berbuah lebat.
+
+Apa yang terjadi lima tahun kemudian?
+
+- [ ] Pak Budi menanam pohon.
+- [ ] Pohon mangga ditebang.
+- [x] Pohon mangga berbuah lebat.
+- [ ] Rumah Pak Budi dipindahkan.
 
 ## difficulty: low · LIT-M10
 Tika is the tallest student in her class.
@@ -566,6 +727,14 @@ What should visitors do?
 - [x] Speak softly or stay silent.
 - [ ] Play music.
 - [ ] Eat snacks.
+
+## difficulty: low · LIT-M16
+Manakah kalimat yang berisi fakta?
+
+- [ ] Pantai Kuta adalah pantai terindah di dunia.
+- [x] Indonesia memiliki lebih dari 17.000 pulau.
+- [ ] Nasi goreng adalah makanan paling enak.
+- [ ] Semua orang pasti suka berlibur ke gunung.
 
 ## difficulty: low · LIT-M17
 Dimas berlatih bermain gitar setiap hari. Dalam lomba musik antarsekolah, ia meraih juara pertama.

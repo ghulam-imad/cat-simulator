@@ -16,6 +16,8 @@ export interface Subject {
   workMinutes: number;
   leadMinutes: number;
   lagMinutes: number;
+  /** How many Questions the Student is given. Each Pool holds at least this many. */
+  questionCount: number;
   questions: Question[];
 }
 

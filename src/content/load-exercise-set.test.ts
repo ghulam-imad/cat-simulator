@@ -60,7 +60,7 @@ What is 1 + 1?
 
     expect(result).toMatchObject({ ok: true, set: { number: "7" } });
     const math = result.ok ? result.set.subjects[0] : undefined;
-    expect(math).toMatchObject({ name: "Math", workMinutes: 20, leadMinutes: 0, lagMinutes: 5 });
+    expect(math).toMatchObject({ name: "Math", workMinutes: 20, leadMinutes: 0, lagMinutes: 5, questionCount: 1 });
     expect(math?.questions[1]).toEqual({
       id: "1-math.md#2",
       difficulty: "medium",
@@ -119,6 +119,27 @@ describe("refusing a broken Exercise Set", () => {
       problems: expect.arrayContaining([
         '1-math.md, Question 2: difficulty "meduim" should be high, medium or low.',
       ]),
+    });
+  });
+
+  test("a Subject with a Question count may have Pools of different sizes, each at least that big", () => {
+    const pool = (difficulty: string, n: number) =>
+      Array.from({ length: n }, (_, i) => `## difficulty: ${difficulty}\nQ${i}?\n\n- [x] a\n- [ ] b\n- [ ] c\n- [ ] d\n`).join("\n");
+    const folder = setFolder("labsky", {
+      "1-math.md": `# Math\nwork: 20 min\nquestions: 2\n\n${pool("high", 3)}\n${pool("medium", 2)}\n${pool("low", 4)}`,
+    });
+
+    const result = loadExerciseSet(folder);
+
+    expect(result).toMatchObject({ ok: true, set: { number: "labsky", subjects: [{ questionCount: 2 }] } });
+  });
+
+  test("with a Question count, every Pool must hold at least that many Questions", () => {
+    const folder = setFolder("9", { "1-math.md": subjectFile("Math", "work: 20 min\nquestions: 2") });
+
+    expect(loadExerciseSet(folder)).toEqual({
+      ok: false,
+      problems: ["1-math.md: asks 2 Questions, so every Pool needs at least 2, but there are 1 High, 1 Medium and 1 Low Questions."],
     });
   });
 

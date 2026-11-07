@@ -1,6 +1,7 @@
 # Kemampuan Akademik
 lead: 5 min
 work: 30 min
+questions: 20
 
 ## difficulty: high · AKA-SL01
 Siswa menanam kacang hijau di tiga pot dengan jenis tanah dan tempat yang sama. Pot A disiram 50 ml, pot B 100 ml, dan pot C 150 ml air setiap hari.
@@ -32,6 +33,14 @@ Jika ular diburu hingga hampir habis, yang paling mungkin terjadi adalah ...
 - [ ] populasi elang bertambah
 - [ ] padi bertambah banyak
 
+## difficulty: high · AKA-SL04
+Pada suhu ruang yang sama, sendok logam terasa lebih dingin daripada sendok kayu. Hal ini terjadi karena ...
+
+- [x] logam lebih cepat menghantarkan panas dari tangan
+- [ ] suhu logam memang lebih rendah
+- [ ] kayu menghasilkan panas sendiri
+- [ ] logam menyerap cahaya
+
 ## difficulty: high · AKA-SL05
 Menurut hukum permintaan, jika harga suatu barang naik (faktor lain tetap), jumlah barang yang diminta akan ...
 
@@ -40,6 +49,14 @@ Menurut hukum permintaan, jika harga suatu barang naik (faktor lain tetap), juml
 - [ ] tetap
 - [ ] hilang sama sekali
 
+## difficulty: high · AKA-SL06
+Harga tiket pesawat biasanya naik menjelang Lebaran. Penyebab utamanya adalah ...
+
+- [ ] penawaran tiket meningkat
+- [ ] pesawat menjadi lebih besar
+- [x] permintaan tiket meningkat tajam
+- [ ] bahan bakar menjadi gratis
+
 ## difficulty: high · AKA-SL07
 Pergantian musim di Bumi terutama disebabkan oleh ...
 
@@ -47,6 +64,14 @@ Pergantian musim di Bumi terutama disebabkan oleh ...
 - [ ] jarak Bulan ke Bumi
 - [ ] terjadinya gerhana
 - [x] revolusi Bumi dan kemiringan sumbu Bumi
+
+## difficulty: high · AKA-SL08
+Selisih waktu WIB dan WIT adalah 2 jam. Jika di Jakarta pukul 09.00 WIB, di Jayapura pukul ...
+
+- [ ] 07.00 WIT
+- [x] 11.00 WIT
+- [ ] 10.00 WIT
+- [ ] 12.00 WIT
 
 ## difficulty: high · AKA-SL09
 Peristiwa Rengasdengklok terjadi karena ...
@@ -63,6 +88,14 @@ Sampah organik sebaiknya dipisahkan dari sampah anorganik karena ...
 - [ ] sampah organik lebih ringan
 - [ ] sampah organik tidak berbau
 - [ ] sampah organik tidak dapat terurai
+
+## difficulty: high · AKA-SL11
+Perubahan energi yang terjadi pada setrika listrik adalah ...
+
+- [ ] energi panas menjadi energi listrik
+- [ ] energi gerak menjadi energi listrik
+- [ ] energi kimia menjadi energi cahaya
+- [x] energi listrik menjadi energi panas
 
 ## difficulty: high · AKA-SL12
 Upaya yang paling tepat untuk mengurangi pemanasan global adalah ...
@@ -98,6 +131,22 @@ Solusi jangka panjang yang paling tepat adalah ...
 - [ ] membiarkan sawah kosong selamanya
 - [x] membangun penampung air hujan dan menanam pohon
 
+## difficulty: high · AKA-SL16
+Dalam piramida makanan, jumlah produsen selalu paling banyak. Alasannya adalah ...
+
+- [ ] ukuran produsen paling besar
+- [ ] konsumen tidak membutuhkan energi
+- [x] energi berkurang di setiap tingkat sehingga dibutuhkan lebih banyak produsen
+- [ ] produsen tidak pernah dimakan
+
+## difficulty: high · AKA-SL17
+Kapal yang terbuat dari besi dapat terapung di air karena ...
+
+- [ ] besi lebih ringan daripada air
+- [ ] air laut mendorong kapal ke bawah
+- [x] bentuknya berongga sehingga massa jenis rata-ratanya lebih kecil daripada air
+- [ ] kapal dicat dengan warna terang
+
 ## difficulty: high · AKA-SL18
 Seorang pedagang membuat 100 kue dengan modal Rp150.000. Semua kue terjual dengan harga Rp2.000 per buah. Keuntungannya adalah ...
 
@@ -113,6 +162,14 @@ Indonesia hanya memiliki dua musim, yaitu kemarau dan hujan. Hal ini terjadi kar
 - [ ] Indonesia memiliki banyak gunung berapi
 - [ ] Indonesia berbentuk kepulauan
 - [x] Indonesia terletak di sekitar khatulistiwa dan dipengaruhi angin muson
+
+## difficulty: high · AKA-SL20
+Jepang mengizinkan pembentukan BPUPKI pada tahun 1945 karena ...
+
+- [ ] Jepang ingin pulang karena musim dingin
+- [ ] Belanda meminta Jepang membentuknya
+- [x] Jepang mulai terdesak dalam Perang Dunia II dan ingin menarik simpati rakyat Indonesia
+- [ ] Indonesia sudah merdeka
 
 ## difficulty: high · ASLI 4.11
 Jika harga suatu barang meningkat sementara pendapatan masyarakat tetap, kemungkinan yang terjadi adalah ...
@@ -191,6 +248,14 @@ Hasil dari proses fotosintesis adalah ...
 - [ ] nitrogen dan protein
 - [ ] oksigen dan karbon dioksida
 
+## difficulty: medium · AKA-SD02
+Gerhana Matahari terjadi ketika ...
+
+- [ ] Bumi berada di antara Bulan dan Matahari
+- [ ] Matahari berada di antara Bumi dan Bulan
+- [ ] Bulan berada di belakang Bumi
+- [x] Bulan berada di antara Bumi dan Matahari
+
 ## difficulty: medium · AKA-SD03
 Kegiatan menyalurkan barang dari produsen ke konsumen disebut ...
 
@@ -214,6 +279,22 @@ Sumpah Pemuda diikrarkan pada tanggal ...
 - [x] 28 Oktober 1928
 - [ ] 17 Agustus 1945
 - [ ] 10 November 1945
+
+## difficulty: medium · AKA-SD06
+Bunyi TIDAK dapat merambat melalui ...
+
+- [ ] air
+- [ ] udara
+- [ ] besi
+- [x] ruang hampa
+
+## difficulty: medium · AKA-SD07
+Jika dua kutub magnet yang sejenis didekatkan, yang terjadi adalah ...
+
+- [ ] tarik-menarik
+- [ ] tidak terjadi apa-apa
+- [x] tolak-menolak
+- [ ] kedua magnet menjadi panas
 
 ## difficulty: medium · AKA-SD08
 Garis khayal yang membagi Bumi menjadi belahan utara dan selatan disebut ...
@@ -263,6 +344,14 @@ Zat makanan yang menjadi sumber energi utama bagi tubuh adalah ...
 - [x] karbohidrat
 - [ ] air
 
+## difficulty: medium · AKA-SD14
+Dalam rangkaian listrik paralel, jika salah satu lampu padam, lampu yang lain akan ...
+
+- [ ] ikut padam
+- [x] tetap menyala
+- [ ] menyala lebih redup
+- [ ] menyala bergantian
+
 ## difficulty: medium · AKA-SD15
 Contoh perubahan kimia adalah ...
 
@@ -294,6 +383,14 @@ Daun kaktus berbentuk duri. Adaptasi ini berfungsi untuk ...
 - [ ] melindungi dari hujan
 - [x] mengurangi penguapan air
 - [ ] mempercepat pertumbuhan
+
+## difficulty: medium · AKA-SD19
+Cicak memutuskan ekornya saat terancam. Cara adaptasi ini disebut ...
+
+- [ ] mimikri
+- [ ] hibernasi
+- [ ] ekolokasi
+- [x] autotomi
 
 ## difficulty: medium · AKA-SD20
 Salah satu dampak positif globalisasi adalah ...
@@ -355,6 +452,14 @@ Bagian tumbuhan yang berfungsi menyerap air dan mineral dari tanah adalah ...
 - [ ] bunga
 - [ ] batang
 
+## difficulty: low · AKA-M02
+Planet yang paling dekat dengan Matahari adalah ...
+
+- [x] Merkurius
+- [ ] Venus
+- [ ] Bumi
+- [ ] Mars
+
 ## difficulty: low · AKA-M03
 Hewan berikut yang bernapas dengan insang adalah ...
 
@@ -362,6 +467,22 @@ Hewan berikut yang bernapas dengan insang adalah ...
 - [ ] ayam
 - [x] ikan
 - [ ] sapi
+
+## difficulty: low · AKA-M04
+Ibu kota Provinsi Jawa Barat adalah ...
+
+- [ ] Semarang
+- [ ] Surabaya
+- [x] Bandung
+- [ ] Serang
+
+## difficulty: low · AKA-M05
+Lambang sila pertama Pancasila adalah ...
+
+- [ ] rantai
+- [x] bintang
+- [ ] pohon beringin
+- [ ] kepala banteng
 
 ## difficulty: low · AKA-M06
 Perubahan wujud es menjadi air disebut ...
@@ -402,6 +523,14 @@ Hewan pemakan daging disebut ...
 - [ ] omnivora
 - [x] karnivora
 - [ ] dekomposer
+
+## difficulty: low · AKA-M11
+Alat untuk mengukur suhu adalah ...
+
+- [ ] barometer
+- [ ] anemometer
+- [ ] higrometer
+- [x] termometer
 
 ## difficulty: low · AKA-M12
 Mata uang resmi negara Indonesia adalah ...
@@ -508,3 +637,11 @@ Bebek memiliki kaki berselaput. Adaptasi tersebut terutama membantu bebek untuk 
 - [x] berenang
 - [ ] menangkap udara
 - [ ] memanjat pohon
+
+## difficulty: low · ASLI 4.17
+Hewan yang memakan tumbuhan disebut ...
+
+- [ ] Predator puncak
+- [x] Konsumen primer
+- [ ] Pengurai
+- [ ] Produsen

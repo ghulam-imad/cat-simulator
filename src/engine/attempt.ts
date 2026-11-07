@@ -5,7 +5,7 @@ export interface Attempt {
   student: string;
   startedAt: number;
   random: () => number;
-  /** The first (Medium) Question of every Subject, drawn up front so viewing never needs randomness. */
+  /** The first (Low) Question of every Subject, drawn up front so viewing never needs randomness. */
   firstQuestions: Question[];
   /** The Question the Student answers next, unless its Subject's Window has closed by then. */
   cursor: Position;
@@ -61,13 +61,15 @@ export interface StartOptions {
   random?: () => number;
 }
 
+/** Adaptive Selection starts every Subject here, with a random Question from this Pool. */
+const FIRST_DIFFICULTY: Difficulty = "low";
 const POINTS: Record<Difficulty, number> = { high: 3, medium: 2, low: 1 };
 const HARDER: Record<Difficulty, Difficulty> = { low: "medium", medium: "high", high: "high" };
 const EASIER: Record<Difficulty, Difficulty> = { high: "medium", medium: "low", low: "low" };
 
 export function startAttempt(set: ExerciseSet, opts: StartOptions): Attempt {
   const random = opts.random ?? Math.random;
-  const firstQuestions = set.subjects.map((_, i) => draw(set, i, "medium", random, new Set()));
+  const firstQuestions = set.subjects.map((_, i) => draw(set, i, FIRST_DIFFICULTY, random, new Set()));
   return {
     set,
     student: opts.student,
@@ -228,9 +230,8 @@ function windowOf(set: ExerciseSet, subjectIndex: number): { opensAt: number; wo
   };
 }
 
-/** A Subject shows as many Questions as each of its Pools holds. */
 function questionsPerSubject(set: ExerciseSet, subjectIndex: number): number {
-  return set.subjects[subjectIndex]!.questions.filter((q) => q.difficulty === "medium").length;
+  return set.subjects[subjectIndex]!.questionCount;
 }
 
 const minutesToMs = (minutes: number) => minutes * 60_000;

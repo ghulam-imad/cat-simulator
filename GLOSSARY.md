@@ -5,7 +5,7 @@ A practice tool where a parent writes timed, multiple-choice exercises and a chi
 ## Content
 
 **Exercise Set**:
-A collection of Subjects that the Student practises in one sitting, identified by its folder name: a number (`007` is Exercise Set 7) or a name (`labsky-001`). Every Exercise Set is kept, even after the Parent writes a new one. Once an Exercise Set has been attempted, its Questions and Correct Options are never changed. Any such change makes a new Exercise Set.
+A collection of Subjects that the Student practises in one sitting, identified by its folder name: a number (`007` is Exercise Set 7) or a name (`labsky`). Every Exercise Set is kept, even after the Parent writes a new one. Once an Exercise Set has been attempted, its Questions and Correct Options are never changed. Any such change makes a new Exercise Set.
 _Avoid_: Pack, test, exam
 
 **Subject**:
@@ -36,7 +36,7 @@ An Option the parent marked as right. A Question can have one or several Correct
 _Avoid_: Answer key, right answer
 
 **Pool**:
-All the Questions of one Difficulty within one Subject. A Subject has three Pools of equal size: High, Medium and Low.
+All the Questions of one Difficulty within one Subject. A Subject has three Pools, High, Medium and Low, and each holds at least as many Questions as the Subject asks. Pools larger than that give every Attempt a different mix of Questions.
 _Avoid_: Bank, bucket
 
 **Work Time**:
@@ -80,7 +80,7 @@ A period during an Attempt when the Student's page was closed. The clock keeps r
 _Avoid_: Pause, break
 
 **Adaptive Selection**:
-The rule that picks each next Question. It starts at Medium in every Subject, goes one Difficulty up after a correct Response, and goes one down after a wrong or missing one. Each Question comes from that Difficulty's Pool, and none is repeated within an Attempt.
+The rule that picks each next Question. It starts with a random Low Question in every Subject, goes one Difficulty up after a correct Response, and goes one down after a wrong or missing one. Each Question comes from that Difficulty's Pool, and none is repeated within an Attempt.
 _Avoid_: Branching, leveling
 
 **Response**:

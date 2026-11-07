@@ -10,9 +10,10 @@ export function loadExerciseSet(folder: string): LoadResult {
     .filter((f) => f.endsWith(".md"))
     .sort((a, b) => parseInt(a) - parseInt(b));
   if (files.length === 0) return { ok: false, problems: ["The folder has no Subject (.md) files."] };
-  const subjects = files.map((file) => parseSubject(file, readFileSync(join(folder, file), "utf8")));
-  const problems = subjects.flatMap((subject, i) => [
-    ...subjectProblems(files[i]!, subject),
+  const parsed = files.map((file) => parseSubject(file, readFileSync(join(folder, file), "utf8")));
+  const subjects = parsed.map((p) => p.subject);
+  const problems = parsed.flatMap(({ subject, countGiven }, i) => [
+    ...subjectProblems(files[i]!, subject, countGiven),
     ...timingProblems(files[i]!, subjects, i),
   ]);
   if (problems.length > 0) return { ok: false, problems };
@@ -43,7 +44,7 @@ function timingProblems(file: string, subjects: Subject[], i: number): string[] 
 }
 
 /** Mistakes in one Subject file, each phrased so the Parent can find and fix it. */
-function subjectProblems(file: string, subject: Subject): string[] {
+function subjectProblems(file: string, subject: Subject, countGiven: boolean): string[] {
   const problems = subject.questions.flatMap((question, i) => {
     const where = `${file}, Question ${i + 1}`;
     const problems: string[] = [];
@@ -60,7 +61,15 @@ function subjectProblems(file: string, subject: Subject): string[] {
   if (!(subject.workMinutes > 0)) problems.push(`${file}: needs a Work Time line, e.g. "work: 20 min".`);
   const count = (d: Difficulty) => subject.questions.filter((q) => q.difficulty === d).length;
   const [high, medium, low] = [count("high"), count("medium"), count("low")];
-  if (high !== medium || medium !== low) {
+  if (countGiven) {
+    // Enough for any Difficulty Path: even all-Low or all-High never runs a Pool dry.
+    if (Math.min(high, medium, low) < subject.questionCount) {
+      problems.push(
+        `${file}: asks ${subject.questionCount} Questions, so every Pool needs at least ${subject.questionCount}, ` +
+          `but there are ${high} High, ${medium} Medium and ${low} Low Questions.`,
+      );
+    }
+  } else if (high !== medium || medium !== low) {
     problems.push(
       `${file}: the Pools must be the same size, but there are ${high} High, ${medium} Medium and ${low} Low Questions.`,
     );
@@ -70,16 +79,26 @@ function subjectProblems(file: string, subject: Subject): string[] {
 
 const OPTION = /^- \[( |x|X)\] (.*)$/;
 
-function parseSubject(file: string, content: string): Subject {
+/**
+ * `countGiven` says whether the file has a "questions: 18" line. Without one, the Subject asks
+ * as many Questions as a Pool holds (and its Pools must then be the same size).
+ */
+function parseSubject(file: string, content: string): { subject: Subject; countGiven: boolean } {
   const [header = "", ...blocks] = content.split(/^## /m);
   const name = /^# (.+)$/m.exec(header)?.[1]?.trim() ?? "";
   const minutes = (key: string) => Number(new RegExp(`^${key}:\\s*(\\d+)\\s*min`, "m").exec(header)?.[1] ?? 0);
+  const questions = blocks.map((block, i) => parseQuestion(`${file}#${i + 1}`, block));
+  const given = /^questions:\s*(\d+)\s*$/m.exec(header)?.[1];
   return {
-    name,
-    workMinutes: minutes("work"),
-    leadMinutes: minutes("lead"),
-    lagMinutes: minutes("lag"),
-    questions: blocks.map((block, i) => parseQuestion(`${file}#${i + 1}`, block)),
+    countGiven: given !== undefined,
+    subject: {
+      name,
+      workMinutes: minutes("work"),
+      leadMinutes: minutes("lead"),
+      lagMinutes: minutes("lag"),
+      questionCount: given !== undefined ? Number(given) : questions.filter((q) => q.difficulty === "medium").length,
+      questions,
+    },
   };
 }
 

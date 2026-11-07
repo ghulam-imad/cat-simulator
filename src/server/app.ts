@@ -133,7 +133,7 @@ export function createApp(opts: AppOptions) {
       workMinutes: s.workMinutes,
       leadMinutes: s.leadMinutes,
       lagMinutes: s.lagMinutes,
-      questionCount: s.questions.filter((q) => q.difficulty === "medium").length,
+      questionCount: s.questionCount,
     }));
     return c.json({
       setNumber: checked.set.number,

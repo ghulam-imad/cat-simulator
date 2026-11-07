@@ -5,10 +5,13 @@ import type { Difficulty, ExerciseSet, Question, Subject } from "./exercise-set.
 const T0 = Date.UTC(2026, 10, 7, 9, 0, 0);
 const minute = (m: number) => T0 + m * 60_000;
 
-/** Builds a Subject whose Pools each hold `perPool` Questions with ids like "Math-H1", "Math-M2". Option 0 is correct. */
+/**
+ * Builds a Subject whose Pools each hold `perPool` Questions with ids like "Math-H1", "Math-M2". Option 0 is correct.
+ * It asks `questions` Questions, by default as many as a Pool holds.
+ */
 function subject(
   name: string,
-  opts: { work: number; lead?: number; lag?: number; perPool?: number; correctOptions?: number[] },
+  opts: { work: number; lead?: number; lag?: number; perPool?: number; questions?: number; correctOptions?: number[] },
 ): Subject {
   const perPool = opts.perPool ?? 3;
   const questions: Question[] = [];
@@ -32,6 +35,7 @@ function subject(
     workMinutes: opts.work,
     leadMinutes: opts.lead ?? 0,
     lagMinutes: opts.lag ?? 0,
+    questionCount: opts.questions ?? perPool,
     questions,
   };
 }
@@ -44,7 +48,7 @@ function exerciseSet(...subjects: Subject[]): ExerciseSet {
 const firstInPool = () => 0;
 
 describe("starting an Attempt", () => {
-  test("the Student first sees a Medium Question from the first Subject", () => {
+  test("the Student first sees a Low Question from the first Subject", () => {
     const set = exerciseSet(subject("Math", { work: 20 }), subject("English", { work: 10 }));
 
     const attempt = startAttempt(set, { student: "Aisha", startedAt: T0, random: firstInPool });
@@ -52,41 +56,60 @@ describe("starting an Attempt", () => {
     expect(viewAt(attempt, T0)).toMatchObject({
       kind: "question",
       subject: "Math",
-      question: { id: "Math-M1", difficulty: "medium" },
+      question: { id: "Math-L1", difficulty: "low" },
     });
   });
 });
 
 describe("Adaptive Selection", () => {
-  const set = exerciseSet(subject("Math", { work: 20 }), subject("English", { work: 10 }));
+  const set = exerciseSet(subject("Math", { work: 20, perPool: 4 }), subject("English", { work: 10 }));
   const start = () => startAttempt(set, { student: "Aisha", startedAt: T0, random: firstInPool });
   const RIGHT = [0];
   const WRONG = [1];
 
   test("a correct Response moves the next Question up one Difficulty", () => {
-    const attempt = submitResponse(start(), RIGHT, minute(1));
+    const attempt = submitResponse(start(), RIGHT, minute(1)); // L1 -> M?
 
-    expect(viewAt(attempt, minute(1))).toMatchObject({ question: { id: "Math-H1" } });
+    expect(viewAt(attempt, minute(1))).toMatchObject({ question: { id: "Math-M1" } });
   });
 
   test("a wrong Response moves the next Question down one Difficulty", () => {
-    const attempt = submitResponse(start(), WRONG, minute(1));
+    let attempt = submitResponse(start(), RIGHT, minute(1)); // L1 -> M1
+    attempt = submitResponse(attempt, WRONG, minute(2)); // M1 -> L?
 
-    expect(viewAt(attempt, minute(1))).toMatchObject({ question: { id: "Math-L1" } });
+    expect(viewAt(attempt, minute(2))).toMatchObject({ question: { id: "Math-L2" } });
   });
 
   test("at High a correct Response stays High, with a Question not seen before", () => {
-    let attempt = submitResponse(start(), RIGHT, minute(1)); // M1 -> H1
-    attempt = submitResponse(attempt, RIGHT, minute(2)); // H1 -> H?
+    let attempt = submitResponse(start(), RIGHT, minute(1)); // L1 -> M1
+    attempt = submitResponse(attempt, RIGHT, minute(2)); // M1 -> H1
+    attempt = submitResponse(attempt, RIGHT, minute(3)); // H1 -> H?
 
-    expect(viewAt(attempt, minute(2))).toMatchObject({ question: { id: "Math-H2" } });
+    expect(viewAt(attempt, minute(3))).toMatchObject({ question: { id: "Math-H2" } });
   });
 
   test("at Low a wrong Response stays Low, with a Question not seen before", () => {
-    let attempt = submitResponse(start(), WRONG, minute(1)); // M1 -> L1
-    attempt = submitResponse(attempt, WRONG, minute(2)); // L1 -> L?
+    const attempt = submitResponse(start(), WRONG, minute(1)); // L1 -> L?
 
-    expect(viewAt(attempt, minute(2))).toMatchObject({ question: { id: "Math-L2" } });
+    expect(viewAt(attempt, minute(1))).toMatchObject({ question: { id: "Math-L2" } });
+  });
+
+  test("the first Question is drawn at random from the Low Pool", () => {
+    const lastInPool = () => 0.99;
+
+    const attempt = startAttempt(set, { student: "Aisha", startedAt: T0, random: lastInPool });
+
+    expect(viewAt(attempt, T0)).toMatchObject({ question: { id: "Math-L4" } });
+  });
+
+  test("a Subject can ask fewer Questions than its Pools hold", () => {
+    const short = exerciseSet(subject("Math", { work: 20, perPool: 5, questions: 2 }), subject("English", { work: 10 }));
+    let attempt = startAttempt(short, { student: "Aisha", startedAt: T0, random: firstInPool });
+
+    expect(viewAt(attempt, T0)).toMatchObject({ questionNumber: 1, questionCount: 2 });
+    attempt = submitResponse(attempt, RIGHT, minute(1));
+    attempt = submitResponse(attempt, RIGHT, minute(2));
+    expect(viewAt(attempt, minute(2))).toEqual({ kind: "waiting", nextSubject: "English", opensAt: minute(20) });
   });
 });
 
@@ -112,7 +135,7 @@ describe("the shared clock", () => {
     const attempt = submitResponse(start(), [0], minute(1)); // 1 of 3 Math Questions answered
 
     expect(viewAt(attempt, minute(24))).toMatchObject({ kind: "question", subject: "Math" });
-    expect(viewAt(attempt, minute(25))).toMatchObject({ kind: "question", subject: "English", question: { id: "English-M1" } });
+    expect(viewAt(attempt, minute(25))).toMatchObject({ kind: "question", subject: "English", question: { id: "English-L1" } });
   });
 
   test("the Attempt is finished when the last Subject's Window closes, at the sum of the Work Times", () => {
@@ -125,7 +148,7 @@ describe("the shared clock", () => {
   test("S1: finishing Math at minute 5, the Student starts English when it opens at minute 15", () => {
     const attempt = answerAll(start(), 3, minute(5));
 
-    expect(viewAt(attempt, minute(15))).toMatchObject({ kind: "question", subject: "English", question: { id: "English-M1" } });
+    expect(viewAt(attempt, minute(15))).toMatchObject({ kind: "question", subject: "English", question: { id: "English-L1" } });
   });
 
   test("S2: Math can still be answered during its Lag, and that time comes out of English", () => {
@@ -173,7 +196,7 @@ describe("Multi-answer Questions", () => {
   };
 
   test("picking every Correct Option, in any order, earns the points", () => {
-    expect(scoreFor([2, 0])).toBe(2);
+    expect(scoreFor([2, 0])).toBe(1); // the first Question is Low
   });
 
   test("picking only some of the Correct Options earns nothing", () => {
@@ -193,15 +216,15 @@ describe("Score", () => {
   const start = () => startAttempt(set, { student: "Aisha", startedAt: T0, random: firstInPool });
 
   test("each Subject scores its correct Responses' Difficulty points; unanswered Questions score 0", () => {
-    let attempt = submitResponse(start(), [0], minute(1)); // Medium, right: 2
-    attempt = submitResponse(attempt, [0], minute(2)); // High, right: 3
+    let attempt = submitResponse(start(), [0], minute(1)); // Low, right: 1
+    attempt = submitResponse(attempt, [0], minute(2)); // Medium, right: 2
     attempt = submitResponse(attempt, [2], minute(3)); // High, wrong: 0
     // English is never answered and Times Out.
 
     expect(viewAt(attempt, minute(30))).toEqual({
       kind: "finished",
       subjects: [
-        { subject: "Math", score: 5, correct: 2, questions: 3 },
+        { subject: "Math", score: 3, correct: 2, questions: 3 },
         { subject: "English", score: 0, correct: 0, questions: 3 },
       ],
     });
@@ -240,11 +263,11 @@ describe("review", () => {
   });
 
   test("shows the Difficulty Path the Student took through each Subject", () => {
-    let attempt = submitResponse(start(), [0], minute(1)); // Medium, right
-    attempt = submitResponse(attempt, [1], minute(2)); // High, wrong
-    attempt = submitResponse(attempt, [1], minute(3)); // Medium, wrong
+    let attempt = submitResponse(start(), [0], minute(1)); // Low, right
+    attempt = submitResponse(attempt, [0], minute(2)); // Medium, right
+    attempt = submitResponse(attempt, [1], minute(3)); // High, wrong
 
-    expect(reviewAt(attempt, minute(30)).subjects[0]!.difficultyPath).toEqual(["medium", "high", "medium"]);
+    expect(reviewAt(attempt, minute(30)).subjects[0]!.difficultyPath).toEqual(["low", "medium", "high"]);
   });
 
   test("a Subject is Timed Out only once its Window has closed with Questions unanswered", () => {
@@ -270,13 +293,13 @@ describe("review", () => {
   });
 
   test("shows whether each Response was correct and the points it earned", () => {
-    let attempt = submitResponse(start(), [0], minute(1)); // Medium, right
-    attempt = submitResponse(attempt, [3], minute(2)); // High, wrong
+    let attempt = submitResponse(start(), [0], minute(1)); // Low, right
+    attempt = submitResponse(attempt, [3], minute(2)); // Medium, wrong
 
     const responses = reviewAt(attempt, minute(30)).subjects[0]!.responses;
 
     expect(responses.map((r) => [r.correct, r.points])).toEqual([
-      [true, 2],
+      [true, 1],
       [false, 0],
     ]);
   });
@@ -290,7 +313,7 @@ describe("ticking Options before submitting", () => {
     let attempt = changeSelection(start(), [1], minute(1));
     attempt = changeSelection(attempt, [2], minute(2));
 
-    expect(viewAt(attempt, minute(3))).toMatchObject({ question: { id: "Math-M1" }, selected: [2] });
+    expect(viewAt(attempt, minute(3))).toMatchObject({ question: { id: "Math-L1" }, selected: [2] });
   });
 
   test("the review lists every change of ticks before each Response was submitted", () => {

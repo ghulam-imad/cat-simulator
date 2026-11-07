@@ -2,6 +2,7 @@
 lead: 5 min
 work: 8 min
 lag: 5 min
+questions: 16
 
 ## difficulty: high · ASLI 3.12
 Manakah pasangan yang memiliki hubungan paling mirip dengan:
@@ -41,6 +42,14 @@ Which statement must be true?
 - [ ] All students practice every day.
 - [x] Some swimmers practice regularly.
 
+## difficulty: high · ASLI 3.7
+Dalam kalimat "Keputusan itu menuai kritik dari berbagai pihak", kata **"menuai"** bermakna ...
+
+- [ ] menghindari
+- [ ] menghentikan
+- [x] mendapatkan atau menerima
+- [ ] memanen tanaman
+
 ## difficulty: high · VER-SL01
 Semua peserta lomba sains adalah siswa berprestasi. Sebagian siswa berprestasi gemar membaca.
 
@@ -60,6 +69,14 @@ Kesimpulan yang tepat adalah ...
 - [ ] Lampu rusak.
 - [ ] Listrik menyala.
 - [x] Lampu tidak menyala.
+
+## difficulty: high · VER-SL03
+Benih : pohon = ulat : ...
+
+- [ ] daun
+- [x] kupu-kupu
+- [ ] kepompong
+- [ ] telur
 
 ## difficulty: high · VER-SL04
 Dokter : stetoskop = tukang kayu : ...
@@ -84,6 +101,14 @@ The word "reluctant" is closest in meaning to ...
 - [ ] happy
 - [x] unwilling
 - [ ] quick
+
+## difficulty: high · VER-SL07
+The opposite of "scarce" is ...
+
+- [ ] rare
+- [ ] small
+- [x] plentiful
+- [ ] expensive
 
 ## difficulty: high · VER-SL08
 Andi datang sebelum Budi. Cici datang setelah Dedi. Budi datang sebelum Dedi.
@@ -110,6 +135,24 @@ Makna peribahasa "Air beriak tanda tak dalam" adalah ...
 - [ ] air sungai yang dangkal berbahaya
 - [ ] orang pendiam itu sombong
 - [ ] orang pintar suka berbicara
+
+## difficulty: high · VER-SL11
+Hujan deras : banjir = kemarau panjang : ...
+
+- [ ] panas
+- [ ] awan
+- [ ] panen
+- [x] kekeringan
+
+## difficulty: high · VER-SL12
+Semua A adalah B. Tidak ada B yang merupakan C.
+
+Kesimpulan yang pasti benar adalah ...
+
+- [ ] Semua A adalah C.
+- [ ] Sebagian A adalah C.
+- [x] Tidak ada A yang merupakan C.
+- [ ] Semua C adalah A.
 
 ## difficulty: high · VER-SL13
 Library : books = gallery : ...
@@ -169,6 +212,26 @@ Book : author = painting : ...
 - [ ] Museum
 - [ ] Color
 
+## difficulty: medium · ASLI 3.2
+Compass : direction = clock : ...
+
+- [ ] Distance
+- [x] Time
+- [ ] Temperature
+- [ ] Speed
+
+## difficulty: medium · ASLI 3.5
+In the sentence:
+
+"The student's answer was accurate, so the teacher accepted it."
+
+The word *accurate* is closest in meaning to ...
+
+- [ ] Unusual
+- [ ] Difficult
+- [ ] Complicated
+- [x] Correct
+
 ## difficulty: medium · ASLI 3.8
 Kurang tidur : mengantuk = kurang latihan : ...
 
@@ -200,6 +263,14 @@ Antonim kata "optimis" adalah ...
 - [ ] gembira
 - [x] pesimis
 - [ ] tekun
+
+## difficulty: medium · VER-SD03
+Air : haus = makanan : ...
+
+- [ ] kenyang
+- [ ] lezat
+- [ ] minum
+- [x] lapar
 
 ## difficulty: medium · VER-SD04
 Termometer : suhu = timbangan : ...
@@ -243,6 +314,14 @@ Kesimpulan yang tepat adalah ...
 - [ ] Tidak ada siswa kelas 6 yang menjadi anggota pramuka.
 - [ ] Semua anggota pramuka adalah siswa kelas 6.
 
+## difficulty: medium · VER-SD09
+Penulis : buku = komposer : ...
+
+- [x] lagu
+- [ ] lukisan
+- [ ] patung
+- [ ] film
+
 ## difficulty: medium · VER-SD10
 Jika hari ini Rabu, 10 hari lagi adalah hari ...
 
@@ -250,6 +329,30 @@ Jika hari ini Rabu, 10 hari lagi adalah hari ...
 - [ ] Minggu
 - [x] Sabtu
 - [ ] Senin
+
+## difficulty: medium · VER-SD11
+The word "fragile" means ...
+
+- [ ] very heavy
+- [x] easily broken
+- [ ] very strong
+- [ ] very old
+
+## difficulty: medium · VER-SD12
+Kelopak : bunga = jari : ...
+
+- [ ] kuku
+- [ ] kaki
+- [x] tangan
+- [ ] cincin
+
+## difficulty: medium · VER-SD13
+Manakah yang tidak sekelompok?
+
+- [ ] Gergaji
+- [ ] Palu
+- [ ] Obeng
+- [x] Piring
 
 ## difficulty: medium · VER-SD14
 Rina lebih tinggi daripada Sari. Sari lebih tinggi daripada Tia.
@@ -277,6 +380,14 @@ Rain : umbrella = sun : ...
 - [ ] night
 - [ ] water
 
+## difficulty: low · ASLI 3.10
+Teacher : school = doctor : ...
+
+- [ ] Market
+- [ ] Library
+- [x] Hospital
+- [ ] Airport
+
 ## difficulty: low · ASLI 3.13
 Dokter : pasien = guru : ...
 
@@ -293,6 +404,22 @@ Kata *tekun* dalam kalimat "Rani tekun belajar setiap malam" memiliki makna ...
 - [x] Rajin dan sungguh-sungguh
 - [ ] Cepat
 
+## difficulty: low · ASLI 3.15
+The word *ancient* is closest in meaning to ...
+
+- [ ] Modern
+- [ ] Future
+- [ ] New
+- [x] Old
+
+## difficulty: low · ASLI 3.17
+Buku : membaca = makanan : ...
+
+- [ ] Memasak
+- [ ] Menjual
+- [x] Makan
+- [ ] Membeli
+
 ## difficulty: low · VER-M01
 Sinonim kata "pandai" adalah ...
 
@@ -308,6 +435,14 @@ Antonim kata "tinggi" adalah ...
 - [ ] besar
 - [ ] panjang
 - [ ] jauh
+
+## difficulty: low · VER-M03
+Kucing : mengeong = anjing : ...
+
+- [x] menggonggong
+- [ ] berkokok
+- [ ] melenguh
+- [ ] mencicit
 
 ## difficulty: low · VER-M04
 Mata : melihat = telinga : ...
@@ -398,6 +533,14 @@ Kesimpulan yang tepat adalah ...
 - [ ] Semua hewan berkaki empat adalah kucing.
 - [ ] Si Manis berkaki dua.
 - [x] Si Manis berkaki empat.
+
+## difficulty: low · VER-M15
+Sinonim kata "cepat" adalah ...
+
+- [ ] lambat
+- [x] lekas
+- [ ] lama
+- [ ] pelan
 
 ## difficulty: low · VER-M16
 Pilot : pesawat = nakhoda : ...
