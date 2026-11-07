@@ -7,6 +7,8 @@ export interface AttemptRow {
   startedAt: number;
   /** The Selected Subjects, by name; `undefined` means every Subject of the Exercise Set. */
   subjects?: string[];
+  /** Shuffles the Options; absent for Attempts from before Options were shuffled. */
+  optionSeed?: number;
   /** Every random number the engine has drawn, in order, so replaying gives the same Questions. */
   randomValues: number[];
 }
@@ -28,7 +30,8 @@ export class AttemptStore {
         started_at INTEGER NOT NULL,
         random_values TEXT NOT NULL DEFAULT '[]',
         discarded_at INTEGER,
-        subjects TEXT
+        subjects TEXT,
+        option_seed INTEGER
       );
       CREATE TABLE IF NOT EXISTS attempt_events (
         attempt_id INTEGER NOT NULL REFERENCES attempts(id),
@@ -42,13 +45,15 @@ export class AttemptStore {
     // Databases from before Subjects could be picked: their Attempts ran every Subject.
     const columns = db.prepare("PRAGMA table_info(attempts)").all().map((c) => String(c.name));
     if (!columns.includes("subjects")) db.exec("ALTER TABLE attempts ADD COLUMN subjects TEXT");
+    // And from before Options were shuffled: their Options stay in written order.
+    if (!columns.includes("option_seed")) db.exec("ALTER TABLE attempts ADD COLUMN option_seed INTEGER");
   }
 
   /** `subjects` is left out when the Attempt runs every Subject. */
-  create(student: string, setNumber: string, startedAt: number, subjects?: string[]): string {
+  create(student: string, setNumber: string, startedAt: number, optionSeed: number, subjects?: string[]): string {
     const result = this.db
-      .prepare("INSERT INTO attempts (student, set_number, started_at, subjects) VALUES (?, ?, ?, ?)")
-      .run(student, setNumber, startedAt, subjects ? JSON.stringify(subjects) : null);
+      .prepare("INSERT INTO attempts (student, set_number, started_at, option_seed, subjects) VALUES (?, ?, ?, ?, ?)")
+      .run(student, setNumber, startedAt, optionSeed, subjects ? JSON.stringify(subjects) : null);
     return String(result.lastInsertRowid);
   }
 
@@ -110,6 +115,7 @@ function toAttemptRow(row: Record<string, unknown>): AttemptRow {
     setNumber: String(row.set_number),
     startedAt: Number(row.started_at),
     ...(row.subjects == null ? {} : { subjects: JSON.parse(String(row.subjects)) as string[] }),
+    ...(row.option_seed == null ? {} : { optionSeed: Number(row.option_seed) }),
     randomValues: JSON.parse(String(row.random_values)) as number[],
   };
 }

@@ -47,7 +47,7 @@ function harness(opts: { random?: () => number } = {}) {
     });
     return { status: res.status, body: (await res.json()) as any };
   };
-  /** Where Option `text` is on the Student's screen right now. */
+  /** Where Option `text` is on the Student's screen right now (the Options are shuffled). */
   const positionOf = async (attemptId: string, text: string) => {
     const { body } = await call("POST", `/api/attempts/${attemptId}/heartbeat`);
     return body.view.kind === "question" ? (body.view.question.options as string[]).indexOf(text) : 0;
@@ -82,7 +82,7 @@ describe("Student", () => {
       subject: "Math",
       question: {
         text: "Math question 5 (low)",
-        options: ["a", "b", "c", "d"],
+        options: expect.any(Array),
         multiAnswer: false,
       },
       selected: [],
@@ -91,6 +91,23 @@ describe("Student", () => {
       workEndsAt: minute(20),
       closesAt: minute(25),
     });
+    expect([...res.body.view.question.options].sort()).toEqual(["a", "b", "c", "d"]);
+  });
+
+  test("the Options are shuffled, and the Student answers by where an Option is on screen", async () => {
+    const { call, answer } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    const shown: string[][] = [];
+    let reply = body;
+    while (reply.view.kind === "question") {
+      shown.push(reply.view.question.options);
+      reply = (await answer(body.attemptId, "a")).body; // "a" is right wherever it was shown
+    }
+
+    expect(shown).toHaveLength(2);
+    expect(shown.some((options) => options.join("") !== "abcd")).toBe(true);
+    const review = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, { "x-parent-pin": "4321" });
+    expect(review.body.subjects[0].responses.map((r: { correct: boolean }) => r.correct)).toEqual([true, true]);
   });
 
   test("submitting a Response moves on to the next Question", async () => {
@@ -570,5 +587,41 @@ describe("Selected Subjects", () => {
     expect(((await res.json()) as any).attempts).toMatchObject([
       { student: "Aisha", skippedSubjects: [], subjects: [{ subject: "Math" }, { subject: "English" }] },
     ]);
+  });
+});
+
+describe("Attempts from before the Options were shuffled", () => {
+  test("keep the Questions they were given, with the Options in the order they were written", async () => {
+    const setsDir = setsDirWithSet7();
+    const dbPath = join(mkdtempSync(join(tmpdir(), "cat-db-")), "cat.sqlite");
+    const old = new DatabaseSync(dbPath);
+    // The database as it was: no option_seed column. The saved draws picked the last Low Question of each Subject.
+    old.exec(`
+      CREATE TABLE attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, student TEXT NOT NULL, set_number TEXT NOT NULL,
+        started_at INTEGER NOT NULL, random_values TEXT NOT NULL DEFAULT '[]', discarded_at INTEGER, subjects TEXT
+      );
+      CREATE TABLE attempt_events (
+        attempt_id INTEGER NOT NULL, seq INTEGER NOT NULL, kind TEXT NOT NULL, selected TEXT, at INTEGER NOT NULL,
+        PRIMARY KEY (attempt_id, seq)
+      );
+      INSERT INTO attempts (student, set_number, started_at, random_values) VALUES ('Aisha', '7', ${T0}, '[0.99, 0.99, 0.99]');
+      INSERT INTO attempt_events VALUES (1, 0, 'response', '[1]', ${minute(1)});
+    `);
+    old.close();
+    const app = createApp({ db: new DatabaseSync(dbPath), setsDir, students: ["Aisha"], parentPin: "4321", now: () => minute(2) });
+
+    const review = (await (await app.request("/api/parent/attempts/1", { headers: { "x-parent-pin": "4321" } })).json()) as any;
+    const resumed = (await (
+      await app.request("/api/attempts", { method: "POST", body: JSON.stringify({ student: "Aisha", setNumber: "7" }) })
+    ).json()) as any;
+
+    expect(review.subjects[0].responses[0]).toMatchObject({
+      question: { text: "Math question 6 (low)" },
+      optionOrder: [0, 1, 2, 3],
+      selected: [1],
+    });
+    // A wrong answer at Low stays Low: the other Low Question, its Options in written order.
+    expect(resumed.view.question).toMatchObject({ text: "Math question 5 (low)", options: ["a", "b", "c", "d"] });
   });
 });

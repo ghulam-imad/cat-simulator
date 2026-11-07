@@ -28,7 +28,7 @@ How hard a Question is: High (worth 3 points), Medium (2 points) or Low (1 point
 _Avoid_: Level, tier
 
 **Option**:
-One answer choice shown for a Question.
+One answer choice shown for a Question. Each Attempt shows a Question's Options in its own shuffled order, which stays the same whenever that Question is shown again in the Attempt.
 _Avoid_: Choice, answer
 
 **Correct Option**:

@@ -46,6 +46,8 @@ export interface AttemptListItem {
 
 export interface ReviewedResponse {
   question: { id: string; difficulty: Difficulty; text: string; options: string[]; correctOptions: number[] };
+  /** The order the Student saw the Options in: position on screen -> index into `question.options`. */
+  optionOrder: number[];
   selected: number[];
   submittedAt: number;
   correct: boolean;

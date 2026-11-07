@@ -5,6 +5,8 @@ export interface Attempt {
   student: string;
   startedAt: number;
   random: () => number;
+  /** Shuffles every Question's Options for this Attempt; see `optionOrder`. Absent: Options keep their written order. */
+  optionSeed?: number;
   /** The first (Low) Question of every Subject, drawn up front so viewing never needs randomness. */
   firstQuestions: Question[];
   /** The Question the Student answers next, unless its Subject's Window has closed by then. */
@@ -34,6 +36,8 @@ export type View =
       question: Question;
       selected: number[];
       /** 1-based position of this Question within its Subject, out of `questionCount`. */
+      /** The order to show the Options in: position on screen -> index into `question.options`. */
+      optionOrder: number[];
       questionNumber: number;
       questionCount: number;
       /** Epoch ms when the Subject's Work Time ends; after this the Student is in Lag. */
@@ -59,6 +63,11 @@ export interface StartOptions {
   startedAt: number;
   /** Returns a number in [0, 1); used to draw Questions from a Pool. */
   random?: () => number;
+  /**
+   * Any 32-bit number; shuffles the Options, differently for each seed. Kept apart from `random`
+   * so shuffling never changes which Questions are drawn. Without it, Options keep their written order.
+   */
+  optionSeed?: number;
 }
 
 /** Adaptive Selection starts every Subject here, with a random Question from this Pool. */
@@ -75,6 +84,7 @@ export function startAttempt(set: ExerciseSet, opts: StartOptions): Attempt {
     student: opts.student,
     startedAt: opts.startedAt,
     random,
+    ...(opts.optionSeed === undefined ? {} : { optionSeed: opts.optionSeed }),
     firstQuestions,
     cursor: { subjectIndex: 0, question: firstQuestions[0]! },
     responses: [],
@@ -123,6 +133,7 @@ export function viewAt(attempt: Attempt, at: number): View {
     subject: subject.name,
     question,
     selected: lastChange?.selected ?? [],
+    optionOrder: optionOrder(attempt, question),
     questionNumber: attempt.responses.filter((r) => r.subjectIndex === subjectIndex).length + 1,
     questionCount: questionsPerSubject(attempt.set, subjectIndex),
     workEndsAt: attempt.startedAt + minutesToMs(window.workEndsAt),
@@ -136,6 +147,8 @@ export interface Review {
 
 export interface ReviewedResponse {
   question: Question;
+  /** The order the Student saw the Options in: position on screen -> index into `question.options`. */
+  optionOrder: number[];
   selected: number[];
   submittedAt: number;
   correct: boolean;
@@ -163,6 +176,7 @@ export function reviewAt(attempt: Attempt, at: number): Review {
           const correct = isCorrect(r.question, r.selected);
           return {
             question: r.question,
+            optionOrder: optionOrder(attempt, r.question),
             selected: r.selected,
             submittedAt: r.submittedAt,
             correct,
@@ -177,6 +191,37 @@ export function reviewAt(attempt: Attempt, at: number): Review {
       };
     }),
   };
+}
+
+/**
+ * The order a Question's Options are shown in during this Attempt: shuffled, and the same every time.
+ * It comes from the Attempt's seed and the Question's id, so it needs no saved state of its own.
+ * Selections and Responses always use the Options' own indexes, never screen positions.
+ */
+export function optionOrder(attempt: Attempt, question: Question): number[] {
+  const order = question.options.map((_, i) => i);
+  if (attempt.optionSeed === undefined) return order;
+  let state = (attempt.optionSeed ^ hashText(question.id)) >>> 0;
+  const next = () => {
+    // mulberry32: a small, well-mixed generator for 32-bit seeds.
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 2 ** 32;
+  };
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [order[i], order[j]] = [order[j]!, order[i]!];
+  }
+  return order;
+}
+
+/** FNV-1a: turns a Question id into 32 bits for `optionOrder`. */
+function hashText(text: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 0x01000193);
+  return hash >>> 0;
 }
 
 /** When the Student could begin a Subject: once it was open and the previous Subject was over. */

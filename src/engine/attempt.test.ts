@@ -333,3 +333,64 @@ describe("ticking Options before submitting", () => {
     ]);
   });
 });
+
+describe("Option order", () => {
+  const set = exerciseSet(subject("Math", { work: 20, perPool: 4 }), subject("English", { work: 10, perPool: 4 }));
+  const orderOf = (attempt: Attempt, at: number) => {
+    const view = viewAt(attempt, at);
+    return view.kind === "question" ? view.optionOrder : undefined;
+  };
+  const start = (optionSeed?: number) => startAttempt(set, { student: "Aisha", startedAt: T0, random: firstInPool, optionSeed });
+
+  test("each Question's Options are shown in a shuffled order that stays the same for that Attempt", () => {
+    let attempt = start(12345);
+    const order = orderOf(attempt, T0);
+
+    attempt = changeSelection(attempt, [1], minute(1));
+
+    expect([...order!].sort()).toEqual([0, 1, 2, 3]);
+    expect(orderOf(attempt, minute(2))).toEqual(order);
+  });
+
+  test("Attempts shuffle the same Question differently, and one Attempt shuffles its Questions differently", () => {
+    const orders = [1, 2, 3, 4, 5, 6].map((seed) => JSON.stringify(orderOf(start(seed * 1_000_003), T0)));
+    let attempt = start(12345);
+    const perQuestion = [JSON.stringify(orderOf(attempt, T0))];
+    for (let i = 1; i < 4; i++) {
+      attempt = submitResponse(attempt, [0], minute(i));
+      perQuestion.push(JSON.stringify(orderOf(attempt, minute(i))));
+    }
+
+    expect(new Set(orders).size).toBeGreaterThan(1);
+    expect(new Set(perQuestion).size).toBeGreaterThan(1);
+  });
+
+  test("shuffling doesn't change which Questions are drawn", () => {
+    // A varied sequence, so taking even one extra number from it would change the draws.
+    const sequence = () => {
+      const values = [0.9, 0.1, 0.6, 0.3, 0.8, 0.5];
+      let i = 0;
+      return () => values[i++ % values.length]!;
+    };
+    const drawn = (optionSeed?: number) => {
+      let attempt = startAttempt(set, { student: "Aisha", startedAt: T0, random: sequence(), optionSeed });
+      for (let i = 1; i <= 3; i++) attempt = submitResponse(attempt, [i % 2], minute(i));
+      return reviewAt(attempt, minute(30)).subjects[0]!.responses.map((r) => r.question.id);
+    };
+
+    expect(drawn(777)).toEqual(drawn(undefined));
+  });
+
+  test("an Attempt without an option seed shows the Options in the order they were written", () => {
+    expect(orderOf(start(), T0)).toEqual([0, 1, 2, 3]);
+  });
+
+  test("the review shows each Response's Options in the order the Student saw them", () => {
+    let attempt = start(12345);
+    const order = orderOf(attempt, T0);
+    attempt = submitResponse(attempt, [0], minute(1));
+
+    expect(order).toHaveLength(4);
+    expect(reviewAt(attempt, minute(30)).subjects[0]!.responses[0]!.optionOrder).toEqual(order);
+  });
+});

@@ -55,6 +55,7 @@ export function createApp(opts: AppOptions) {
       student: row.student,
       startedAt: row.startedAt,
       random: replayingRandom,
+      optionSeed: row.optionSeed,
     });
     const interruptions: Interruption[] = [];
     let lastActivity = row.startedAt;
@@ -176,7 +177,8 @@ export function createApp(opts: AppOptions) {
     }
     // An Attempt that picked every Subject is saved as an ordinary one.
     const picked = subjects && checked.set.subjects.some((s) => !subjects.includes(s.name)) ? subjects : undefined;
-    const attemptId = store.create(student, checked.set.number, now(), picked);
+    const optionSeed = Math.floor(random() * 2 ** 32);
+    const attemptId = store.create(student, checked.set.number, now(), optionSeed, picked);
     const { attempt, saveDraws } = rebuild(store.get(attemptId)!);
     saveDraws();
     return c.json({ attemptId, ...studentReply(attempt) });
@@ -185,9 +187,10 @@ export function createApp(opts: AppOptions) {
   /** Applies one Student action to the Attempt and saves it. */
   const act = (kind: "response" | "selection") => async (c: Context) => {
     const id = c.req.param("id")!;
-    const { selected } = await c.req.json<{ selected: number[] }>();
+    const { selected: onScreen } = await c.req.json<{ selected: number[] }>();
     const { attempt, saveDraws } = rebuild(store.get(id)!);
     const at = now();
+    const selected = toOptionIndexes(viewAt(attempt, at), onScreen);
     let updated: Attempt;
     try {
       updated = kind === "response" ? submitResponse(attempt, selected, at) : changeSelection(attempt, selected, at);
@@ -332,12 +335,26 @@ function findSetFolder(setsDir: string, setNumber: string): string | undefined {
   return name === undefined ? undefined : join(setsDir, name);
 }
 
-/** The View as the Student's page may see it: no Correct Options, no Difficulty. */
+/**
+ * The View as the Student's page may see it: no Correct Options, no Difficulty, and the Options
+ * in this Attempt's shuffled order, so ticks are positions on screen.
+ */
 function forStudent(view: View) {
   if (view.kind !== "question") return view;
-  const { question } = view;
+  const { question, optionOrder, selected, ...rest } = view;
   return {
-    ...view,
-    question: { text: question.text, options: question.options, multiAnswer: question.correctOptions.length > 1 },
+    ...rest,
+    question: {
+      text: question.text,
+      options: optionOrder.map((i) => question.options[i]!),
+      multiAnswer: question.correctOptions.length > 1,
+    },
+    selected: selected.map((i) => optionOrder.indexOf(i)).sort((a, b) => a - b),
   };
+}
+
+/** Turns the positions the Student ticked on screen back into the Options' own indexes. */
+function toOptionIndexes(view: View, onScreen: number[]): number[] {
+  if (view.kind !== "question") return onScreen; // nothing on screen: the engine refuses it anyway
+  return onScreen.filter((p) => Number.isInteger(p) && p >= 0 && p < view.optionOrder.length).map((p) => view.optionOrder[p]!);
 }

@@ -83,7 +83,7 @@ Exercise Sets are read from disk on each login, so a new set appears without a r
 1. The Student picks their name, chooses the Exercise Set from a list (e.g. `7` or `labsky`) and presses **Mulai** (Start) once.
    Under **Opsi lanjutan** they can untick Subjects to practise only some of them. The picked Subjects still run in the set's order, with their own Work Time, Lead and Lag, Adaptive Selection and Scoring. The first picked Subject has no Lead and the last has no Lag, and a Lead or Lag never runs past the neighbouring Subject's Work Time. The total time is the sum of the picked Work Times.
 2. Subjects run one after another on **one shared clock**. Each Subject has a **Work Time**, plus an optional **Lead** (it may open early) and **Lag** (it may run late).
-3. **Adaptive Selection:** each Subject starts with a random Low Question. A correct Response moves the next Question up one Difficulty and a wrong one moves it down. Questions are never repeated.
+3. **Adaptive Selection:** each Subject starts with a random Low Question. A correct Response moves the next Question up one Difficulty and a wrong one moves it down. Questions are never repeated. Each Attempt also shuffles every Question's Options, so the right answer isn't always in the same place; the Parent review shows them in the order the Student saw.
 4. There's no going back and no skipping. A Subject ends when every Question is answered or its Window closes. Unanswered Questions are **Timed Out**.
 5. The Student sees no right/wrong feedback until the end. Then a short summary shows points and number correct for each Subject.
 6. Closing the tab doesn't pause the clock. Reopening brings back the same Question with the same ticks.

@@ -376,6 +376,8 @@ const letter = (i: number) => "ABCD"[i] ?? "?";
 
 function ResponseReview({ n, response: r, setNumber }: { n: number; response: ReviewedResponse; setNumber: string }) {
   const [open, setOpen] = useState(!r.correct);
+  // Letters follow the Student's screen (the Options were shuffled), so "you picked B" means what they saw.
+  const shownAs = (i: number) => letter(r.optionOrder.indexOf(i));
   return (
     <div style={{ borderTop: "1px solid var(--grid)", padding: "12px 0" }}>
       <button
@@ -402,17 +404,18 @@ function ResponseReview({ n, response: r, setNumber }: { n: number; response: Re
         <div style={{ marginTop: 10 }}>
           <Markdown text={r.question.text} setNumber={setNumber} />
           <ul className="review-options">
-            {r.question.options.map((option, i) => {
+            {r.optionOrder.map((i, position) => {
+              const option = r.question.options[i]!;
               const picked = r.selected.includes(i);
               const right = r.question.correctOptions.includes(i);
               return (
-                <li key={i} className={picked ? "picked" : ""}>
+                <li key={position} className={picked ? "picked" : ""}>
                   <span className={`mark ${right ? "result-good" : picked ? "result-bad" : "muted"}`}>
                     {picked && right && "✓ Dipilih, benar"}
                     {picked && !right && "✗ Dipilih, salah"}
                     {!picked && right && "✓ Jawaban benar"}
                   </span>
-                  <strong>{letter(i)}</strong>
+                  <strong>{letter(position)}</strong>
                   <span>
                     <Markdown text={option} setNumber={setNumber} inline />
                   </span>
@@ -424,7 +427,7 @@ function ResponseReview({ n, response: r, setNumber }: { n: number; response: Re
             <p className="small secondary" style={{ marginTop: 8 }}>
               Ganti jawaban:{" "}
               {r.selectionChanges
-                .map((c) => `${c.selected.map(letter).join("+") || "kosong"} (${formatClock(c.at)})`)
+                .map((c) => `${c.selected.map(shownAs).sort().join("+") || "kosong"} (${formatClock(c.at)})`)
                 .join(" → ")}
             </p>
           )}
