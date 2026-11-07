@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { serve } from "@hono/node-server";
 import { getConnInfo } from "@hono/node-server/conninfo";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { ipRestriction } from "hono/ip-restriction";
 import { createApp } from "./app.js";
@@ -65,7 +66,12 @@ app.route(
     parentPin: config.parentPin,
   }),
 );
-app.get("/", (c) => c.text("CAT Simulator server is running. The Student and Parent screens are not built yet."));
+// The screens, built by `vite build` into dist/web. Any other page path (e.g. /parent) gets the app shell.
+const webDir = resolve(import.meta.dirname, "../../dist/web");
+if (!existsSync(webDir)) fail(`The screens haven't been built. Run "npm start" (it builds them) or "npm run build".`);
+app.all("/api/*", (c) => c.json({ error: "Not found." }, 404));
+app.use("/assets/*", serveStatic({ root: webDir }));
+app.get("*", serveStatic({ path: `${webDir}/index.html` }));
 
 serve({ fetch: app.fetch, port, hostname: host }, () => {
   console.log(`CAT Simulator running`);

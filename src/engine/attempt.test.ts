@@ -143,6 +143,19 @@ describe("the shared clock", () => {
     expect(viewAt(attempt, minute(17))).toMatchObject({ kind: "question", subject: "English" });
   });
 
+  test("a Question shows its number in the Subject and when the Work Time ends and the Window closes", () => {
+    const attempt = submitResponse(start(), [0], minute(1));
+
+    expect(viewAt(attempt, minute(2))).toMatchObject({
+      kind: "question",
+      subject: "Math",
+      questionNumber: 2,
+      questionCount: 3,
+      workEndsAt: minute(20),
+      closesAt: minute(25),
+    });
+  });
+
   test("a Response cannot be submitted while waiting for the next Subject to open", () => {
     const attempt = answerAll(start(), 3, minute(5));
 

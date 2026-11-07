@@ -70,6 +70,12 @@ What is 1 + 1?
     });
   });
 
+  test("a named Exercise Set folder keeps its name", () => {
+    const folder = setFolder("labsky-001", { "1-math.md": subjectFile("Math", "work: 20 min") });
+
+    expect(loadExerciseSet(folder)).toMatchObject({ ok: true, set: { number: "labsky-001" } });
+  });
+
   test("puts Subjects in the order of the number in front of their file names", () => {
     const folder = setFolder("8", {
       "2-english.md": subjectFile("English", "work: 10 min\nlead: 5 min\nlag: 5 min"),

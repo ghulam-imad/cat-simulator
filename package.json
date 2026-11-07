@@ -4,22 +4,37 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/server/main.ts",
+    "start": "vite build && tsx src/server/main.ts",
+    "build": "vite build",
+    "dev:web": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p web"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
     "typescript": "^7.0.2",
+    "vite": "^8.3.6",
     "vitest": "^5.1.0"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",
     "hono": "^4.13.17",
+    "katex": "^0.19.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "tsx": "^4.23.15"
   },
   "engines": {
     "node": ">=24"
+  },
+  "overrides": {
+    "katex": "$katex"
   }
 }

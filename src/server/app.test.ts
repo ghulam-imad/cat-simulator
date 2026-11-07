@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -51,6 +51,8 @@ function harness(opts: { random?: () => number } = {}) {
     setsDir,
     clock,
     call,
+    /** A plain GET, for non-JSON replies such as images. */
+    get: (path: string) => app.request(path),
     restart: (random?: () => number) => {
       app = build(random);
     },
@@ -73,6 +75,10 @@ describe("Student", () => {
         multiAnswer: false,
       },
       selected: [],
+      questionNumber: 1,
+      questionCount: 2,
+      workEndsAt: minute(20),
+      closesAt: minute(25),
     });
   });
 
@@ -170,6 +176,132 @@ describe("Student", () => {
 
     expect(second.body.attemptId).not.toBe(first.body.attemptId);
     expect(second.body.view).toMatchObject({ kind: "question", subject: "Math" });
+  });
+});
+
+describe("choosing an Exercise Set", () => {
+  test("lists every Exercise Set, numbers first then names, marking ones that need fixing", async () => {
+    const { call, setsDir } = harness();
+    for (const name of ["labsky-002", "labsky-001"]) {
+      mkdirSync(join(setsDir, name));
+      writeFileSync(join(setsDir, name, "1-math.md"), readFileSync(join(setsDir, "007", "1-math.md"), "utf8").replace("lag: 5 min", ""));
+    }
+    mkdirSync(join(setsDir, "012"));
+    writeFileSync(join(setsDir, "012", "1-math.md"), "# Math\nwork: 20 min\n");
+    writeFileSync(join(setsDir, "notes.txt"), "not a set");
+
+    const res = await call("GET", "/api/sets");
+
+    expect(res.body.sets).toEqual([
+      { name: "7", ready: true },
+      { name: "12", ready: false },
+      { name: "labsky-001", ready: true },
+      { name: "labsky-002", ready: true },
+    ]);
+  });
+});
+
+describe("Exercise Set names", () => {
+  test("a named set is found whatever the case, and every spelling resumes the same Attempt", async () => {
+    const { call, setsDir } = harness();
+    mkdirSync(join(setsDir, "labsky-001"));
+    for (const f of ["1-math.md", "2-english.md"]) {
+      writeFileSync(join(setsDir, "labsky-001", f), readFileSync(join(setsDir, "007", f), "utf8"));
+    }
+
+    const first = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "labsky-001" });
+    const again = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "Labsky-001" });
+    const summary = await call("GET", "/api/sets/LABSKY-001?student=Aisha");
+
+    expect(again.body.attemptId).toBe(first.body.attemptId);
+    expect(summary.body).toMatchObject({ setNumber: "labsky-001", inProgress: true });
+  });
+
+  test("a numbered set resumes the same Attempt whether typed as 007 or 7", async () => {
+    const { call } = harness();
+
+    const first = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "007" });
+    const again = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+
+    expect(again.body.attemptId).toBe(first.body.attemptId);
+  });
+});
+
+describe("Start screen", () => {
+  test("shows the Exercise Set's Subjects and times, and whether the Student has an Attempt in progress", async () => {
+    const { call } = harness();
+    const before = await call("GET", "/api/sets/7?student=Aisha");
+    await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    const after = await call("GET", "/api/sets/7?student=Aisha");
+
+    expect(before.body).toEqual({
+      setNumber: "7",
+      totalMinutes: 30,
+      subjects: [
+        { name: "Math", workMinutes: 20, leadMinutes: 0, lagMinutes: 5, questionCount: 2 },
+        { name: "English", workMinutes: 10, leadMinutes: 5, lagMinutes: 0, questionCount: 2 },
+      ],
+      inProgress: false,
+    });
+    expect(after.body.inProgress).toBe(true);
+  });
+
+  test("an unknown Exercise Set number is reported before starting", async () => {
+    const { call } = harness();
+
+    expect(await call("GET", "/api/sets/12?student=Aisha")).toEqual({
+      status: 404,
+      body: { error: "There is no Exercise Set 12." },
+    });
+  });
+});
+
+describe("pictures in Questions", () => {
+  test("an image in the Exercise Set's folder is served with its type", async () => {
+    const { get, setsDir } = harness();
+    mkdirSync(join(setsDir, "007", "images"));
+    writeFileSync(join(setsDir, "007", "images", "triangle.png"), "PNGDATA");
+
+    const res = await get("/api/sets/7/files/images/triangle.png");
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/png");
+    expect(await res.text()).toBe("PNGDATA");
+  });
+
+  test("the Subject files are never served, because they contain the answers", async () => {
+    const { get } = harness();
+
+    expect((await get("/api/sets/7/files/1-math.md")).status).toBe(404);
+  });
+
+  test("a path that climbs out of the Exercise Set's folder is refused", async () => {
+    const { get, setsDir } = harness();
+    writeFileSync(join(setsDir, "secret.png"), "SECRET");
+
+    expect((await get("/api/sets/7/files/..%2Fsecret.png")).status).toBe(404);
+    expect((await get("/api/sets/7/files/images%2F..%2F..%2Fsecret.png")).status).toBe(404);
+  });
+});
+
+describe("Student's clock", () => {
+  test("every reply carries the server's time, so the page's countdown doesn't depend on the tablet's clock", async () => {
+    const { call, clock } = harness();
+    const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    clock.now = minute(1);
+    const heartbeat = await call("POST", `/api/attempts/${started.body.attemptId}/heartbeat`);
+    clock.now = minute(2);
+    const selection = await call("POST", `/api/attempts/${started.body.attemptId}/selection`, { selected: [1] });
+
+    expect([started.body.now, heartbeat.body.now, selection.body.now]).toEqual([T0, minute(1), minute(2)]);
+  });
+
+  test("replies say when the whole Exercise Set ends, for the total time left", async () => {
+    const { call } = harness();
+
+    const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+
+    expect(started.body.endsAt).toBe(minute(30));
   });
 });
 

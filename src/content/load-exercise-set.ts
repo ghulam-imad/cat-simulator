@@ -16,7 +16,7 @@ export function loadExerciseSet(folder: string): LoadResult {
     ...timingProblems(files[i]!, subjects, i),
   ]);
   if (problems.length > 0) return { ok: false, problems };
-  return { ok: true, set: { number: String(Number(basename(folder))), subjects } };
+  return { ok: true, set: { number: setName(basename(folder)), subjects } };
 }
 
 /** Lead and Lag that don't fit with the neighbouring Subjects. */
@@ -98,4 +98,9 @@ function parseQuestion(id: string, block: string): Question {
     options: optionMatches.map((m) => m[2]!),
     correctOptions: optionMatches.flatMap((m, i) => (m[1] === " " ? [] : [i])),
   };
+}
+
+/** A numbered folder like `007` is Exercise Set `7`; any other folder name, like `labsky-001`, is used as is. */
+export function setName(folderName: string): string {
+  return /^\d+$/.test(folderName) ? String(Number(folderName)) : folderName;
 }

@@ -1,8 +1,8 @@
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
+import { extname, join, resolve, sep } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { type Context, Hono } from "hono";
-import { loadExerciseSet } from "../content/load-exercise-set.js";
+import { loadExerciseSet, setName } from "../content/load-exercise-set.js";
 import { type Attempt, changeSelection, reviewAt, startAttempt, submitResponse, type View, viewAt } from "../engine/attempt.js";
 import type { ExerciseSet } from "../engine/exercise-set.js";
 import { type AttemptRow, AttemptStore } from "./attempt-store.js";
@@ -56,9 +56,9 @@ export function createApp(opts: AppOptions) {
       if (event.kind === "selection") attempt = changeSelection(attempt, event.selected, event.at);
     }
     // Closed and never reopened before the Exercise Set ran out (finishing every Question ends it sooner, with no gap).
-    const setEndsAt = row.startedAt + attempt.set.subjects.reduce((sum, s) => sum + s.workMinutes, 0) * 60_000;
-    if (attempt.cursor !== "finished" && now() >= setEndsAt && setEndsAt - lastActivity > INTERRUPTION_GAP_MS) {
-      interruptions.push({ from: lastActivity, to: setEndsAt, ...whereAt(attempt, lastActivity) });
+    const endsAt = setEndsAt(attempt);
+    if (attempt.cursor !== "finished" && now() >= endsAt && endsAt - lastActivity > INTERRUPTION_GAP_MS) {
+      interruptions.push({ from: lastActivity, to: endsAt, ...whereAt(attempt, lastActivity) });
     }
     const saveDraws = () => {
       if (values.length > row.randomValues.length) store.saveRandomValues(row.id, values);
@@ -66,31 +66,96 @@ export function createApp(opts: AppOptions) {
     return { attempt, saveDraws, interruptions };
   };
 
-  const studentView = (attempt: Attempt) => forStudent(viewAt(attempt, now()));
+  /** What the Student's page receives: the View (answers removed), the server's time, and when the Exercise Set ends. */
+  const studentReply = (attempt: Attempt) => {
+    const at = now();
+    return { now: at, endsAt: setEndsAt(attempt), view: forStudent(viewAt(attempt, at)) };
+  };
 
   app.get("/api/students", (c) => c.json({ students: opts.students }));
 
-  app.post("/api/attempts", async (c) => {
-    const { student, setNumber } = await c.req.json<{ student: string; setNumber: string }>();
-    if (!opts.students.includes(student)) return c.json({ error: `${student} is not on the Student list.` }, 400);
+  /** Checks a Student and Exercise Set number at login; returns the set, or the error to reply with. */
+  const checkLogin = (student: string, setNumber: string) => {
+    if (!opts.students.includes(student)) {
+      return { error: { error: `${student} is not on the Student list.` }, status: 400 as const };
+    }
     const folder = findSetFolder(opts.setsDir, setNumber);
-    if (!folder) return c.json({ error: `There is no Exercise Set ${setNumber}.` }, 404);
+    if (!folder) return { error: { error: `There is no Exercise Set ${setNumber}.` }, status: 404 as const };
     const loaded = loadExerciseSet(folder);
     if (!loaded.ok) {
-      return c.json({ error: `Exercise Set ${setNumber} can't be used yet.`, problems: loaded.problems }, 422);
+      return {
+        error: { error: `Exercise Set ${setNumber} can't be used yet.`, problems: loaded.problems },
+        status: 422 as const,
+      };
     }
+    return { set: loaded.set };
+  };
+
+  /** The Student's Attempt at this Exercise Set that hasn't finished yet, if any. */
+  const inProgressAttempt = (student: string, setNumber: string) => {
     const latest = store.latest(student, setNumber);
-    if (latest) {
-      const { attempt } = rebuild(latest);
-      if (viewAt(attempt, now()).kind !== "finished") {
-        store.append(latest.id, { kind: "heartbeat", at: now() });
-        return c.json({ attemptId: latest.id, view: studentView(attempt) });
-      }
+    if (!latest) return undefined;
+    const { attempt } = rebuild(latest);
+    return viewAt(attempt, now()).kind === "finished" ? undefined : { row: latest, attempt };
+  };
+
+  app.get("/api/sets", (c) => {
+    const sets = readdirSync(opts.setsDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({ name: setName(entry.name), ready: loadExerciseSet(join(opts.setsDir, entry.name)).ok }))
+      .sort((a, b) => {
+        const [x, y] = [Number(a.name), Number(b.name)];
+        if (Number.isInteger(x) && Number.isInteger(y)) return x - y;
+        if (Number.isInteger(x) !== Number.isInteger(y)) return Number.isInteger(x) ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+    return c.json({ sets });
+  });
+
+  app.get("/api/sets/:number", (c) => {
+    const setNumber = c.req.param("number");
+    const student = c.req.query("student") ?? "";
+    const checked = checkLogin(student, setNumber);
+    if (!checked.set) return c.json(checked.error, checked.status);
+    const subjects = checked.set.subjects.map((s) => ({
+      name: s.name,
+      workMinutes: s.workMinutes,
+      leadMinutes: s.leadMinutes,
+      lagMinutes: s.lagMinutes,
+      questionCount: s.questions.filter((q) => q.difficulty === "medium").length,
+    }));
+    return c.json({
+      setNumber: checked.set.number,
+      totalMinutes: subjects.reduce((sum, s) => sum + s.workMinutes, 0),
+      subjects,
+      inProgress: inProgressAttempt(student, checked.set.number) !== undefined,
+    });
+  });
+
+  app.get("/api/sets/:number/files/*", (c) => {
+    const setNumber = c.req.param("number");
+    const folder = findSetFolder(opts.setsDir, setNumber);
+    const prefix = `/api/sets/${setNumber}/files/`;
+    const rawPath = new URL(c.req.url).pathname;
+    const file = folder && rawPath.startsWith(prefix) ? imageInFolder(folder, rawPath.slice(prefix.length)) : undefined;
+    if (!file) return c.json({ error: "No such picture." }, 404);
+    return c.body(readFileSync(file.path), 200, { "content-type": file.type });
+  });
+
+  app.post("/api/attempts", async (c) => {
+    const { student, setNumber } = await c.req.json<{ student: string; setNumber: string }>();
+    const checked = checkLogin(student, setNumber);
+    if (!checked.set) return c.json(checked.error, checked.status);
+    // Saved under the set's own name, so "007"/"7" or "Labsky-001"/"labsky-001" resume the same Attempt.
+    const open = inProgressAttempt(student, checked.set.number);
+    if (open) {
+      store.append(open.row.id, { kind: "heartbeat", at: now() });
+      return c.json({ attemptId: open.row.id, ...studentReply(open.attempt) });
     }
-    const attemptId = store.create(student, setNumber, now());
+    const attemptId = store.create(student, checked.set.number, now());
     const { attempt, saveDraws } = rebuild(store.get(attemptId)!);
     saveDraws();
-    return c.json({ attemptId, view: studentView(attempt) });
+    return c.json({ attemptId, ...studentReply(attempt) });
   });
 
   /** Applies one Student action to the Attempt and saves it. */
@@ -103,17 +168,17 @@ export function createApp(opts: AppOptions) {
     try {
       updated = kind === "response" ? submitResponse(attempt, selected, at) : changeSelection(attempt, selected, at);
     } catch (refusal) {
-      return c.json({ error: (refusal as Error).message, view: studentView(attempt) }, 409);
+      return c.json({ error: (refusal as Error).message, ...studentReply(attempt) }, 409);
     }
     store.append(id, { kind, selected, at });
     saveDraws();
-    return c.json({ view: studentView(updated) });
+    return c.json(studentReply(updated));
   };
 
   app.post("/api/attempts/:id/heartbeat", (c) => {
     const id = c.req.param("id");
     store.append(id, { kind: "heartbeat", at: now() });
-    return c.json({ view: studentView(rebuild(store.get(id)!).attempt) });
+    return c.json(studentReply(rebuild(store.get(id)!).attempt));
   });
 
   app.post("/api/attempts/:id/responses", act("response"));
@@ -173,6 +238,11 @@ export function createApp(opts: AppOptions) {
   return app;
 }
 
+/** When the whole Exercise Set ends: Start plus the sum of the Work Times. */
+function setEndsAt(attempt: Attempt): number {
+  return attempt.startedAt + attempt.set.subjects.reduce((sum, s) => sum + s.workMinutes, 0) * 60_000;
+}
+
 /** A gap in the Student's activity longer than this means their page was closed. */
 const INTERRUPTION_GAP_MS = 30_000;
 
@@ -196,9 +266,43 @@ function whereAt(attempt: Attempt, at: number): { subject: string; questionNumbe
   };
 }
 
-/** `7` finds `sets/007` or `sets/7`. */
+const IMAGE_TYPES: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+};
+
+/**
+ * Resolves an encoded relative path to an image file inside `folder`.
+ * Anything that isn't an image (notably the Subject .md files, which hold the answers)
+ * or that lands outside the folder, including via symlinks, is refused.
+ */
+function imageInFolder(folder: string, encodedPath: string): { path: string; type: string } | undefined {
+  let relative: string;
+  try {
+    relative = decodeURIComponent(encodedPath);
+  } catch {
+    return undefined;
+  }
+  const type = IMAGE_TYPES[extname(relative).toLowerCase()];
+  const candidate = resolve(folder, relative);
+  if (!type || !existsSync(candidate)) return undefined;
+  const root = realpathSync(folder);
+  const real = realpathSync(candidate);
+  if (!real.startsWith(root + sep) || !statSync(real).isFile()) return undefined;
+  return { path: real, type };
+}
+
+/** `7` finds `sets/007` or `sets/7`; `Labsky-001` finds `sets/labsky-001` (case doesn't matter). */
 function findSetFolder(setsDir: string, setNumber: string): string | undefined {
-  const name = readdirSync(setsDir).find((entry) => Number(entry) === Number(setNumber));
+  const wanted = setName(setNumber.trim()).toLowerCase();
+  const name = readdirSync(setsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .find((entry) => setName(entry).toLowerCase() === wanted);
   return name === undefined ? undefined : join(setsDir, name);
 }
 

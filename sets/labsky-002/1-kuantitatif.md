@@ -1,0 +1,455 @@
+# Kemampuan Kuantitatif (Numerasi)
+work: 27 min
+lag: 5 min
+
+## difficulty: high · ASLI 1.10
+Jumlah umur Ayah dan anaknya sekarang adalah 48 tahun. Empat tahun lagi, umur Ayah akan menjadi 3 kali umur anaknya. Umur anak sekarang adalah ....
+
+- [ ] 8 tahun
+- [ ] 12 tahun
+- [ ] 9 tahun
+- [x] 10 tahun
+
+## difficulty: high · ASLI 1.4
+Perhatikan pola:
+
+2, 5, 11, 23, 47, ...
+
+Bilangan berikutnya adalah ....
+
+- [ ] 84
+- [ ] 97
+- [x] 95
+- [ ] 89
+
+## difficulty: high · ASLI 1.5
+Sebuah tangki terisi 3/5 bagian. Setelah ditambahkan 24 liter air, tangki menjadi terisi 9/10 bagian. Kapasitas tangki tersebut adalah ....
+
+- [ ] 72 liter
+- [ ] 60 liter
+- [x] 80 liter
+- [ ] 90 liter
+
+## difficulty: high · ASLI 1.6
+Rata-rata nilai 5 siswa adalah 78. Setelah nilai seorang siswa baru dimasukkan, rata-rata 6 siswa menjadi 80. Nilai siswa baru tersebut adalah ....
+
+- [ ] 92
+- [ ] 88
+- [x] 90
+- [ ] 86
+
+## difficulty: high · NUM-SL01
+Kota A dan kota B berjarak 210 km. Mobil P berangkat dari A menuju B dengan kecepatan 60 km/jam. Pada saat yang sama, mobil Q berangkat dari B menuju A dengan kecepatan 45 km/jam. Jika keduanya berangkat pukul 08.00, mereka berpapasan pukul ....
+
+- [ ] 09.30
+- [ ] 10.30
+- [x] 10.00
+- [ ] 11.00
+
+## difficulty: high · NUM-SL03
+Harga sebuah barang dinaikkan 20%, kemudian diturunkan 20% dari harga yang baru. Dibandingkan harga semula, harga akhir barang tersebut ....
+
+- [ ] tetap sama
+- [ ] naik 4%
+- [ ] turun 2%
+- [x] turun 4%
+
+## difficulty: high · NUM-SL04
+Perhatikan pola berikut:
+
+2, 6, 12, 20, 30, ...
+
+Bilangan berikutnya adalah ....
+
+- [x] 42
+- [ ] 40
+- [ ] 36
+- [ ] 44
+
+## difficulty: high · NUM-SL06
+Uang A dan B berbanding 3 : 5 dengan jumlah Rp160.000. Agar uang mereka sama banyak, B harus memberikan uang kepada A sebesar ....
+
+- [ ] Rp40.000
+- [ ] Rp30.000
+- [ ] Rp10.000
+- [x] Rp20.000
+
+## difficulty: high · NUM-SL07
+Keliling sebuah persegi panjang 36 cm. Panjangnya 2 kali lebarnya. Luas persegi panjang tersebut adalah ....
+
+- [ ] 81 cm²
+- [x] 72 cm²
+- [ ] 36 cm²
+- [ ] 48 cm²
+
+## difficulty: high · NUM-SL08
+Sebuah bilangan dua angka memiliki jumlah angka 11. Angka puluhannya 3 lebih besar daripada angka satuannya. Bilangan tersebut adalah ....
+
+- [ ] 47
+- [ ] 83
+- [x] 74
+- [ ] 65
+
+## difficulty: high · NUM-SL09
+Luas setengah lingkaran dengan jari-jari 14 cm adalah .... (π = 22/7)
+
+- [ ] 616 cm²
+- [ ] 154 cm²
+- [ ] 88 cm²
+- [x] 308 cm²
+
+## difficulty: high · NUM-SL10
+Uang Rp150.000 dibagikan kepada A, B, dan C dengan perbandingan 2 : 3 : 5. Selisih uang C dan A adalah ....
+
+- [x] Rp45.000
+- [ ] Rp30.000
+- [ ] Rp75.000
+- [ ] Rp15.000
+
+## difficulty: high · NUM-SL11
+Sebuah toko memberi diskon 25%, lalu diskon tambahan 10% dari harga setelah diskon pertama. Harga awal barang Rp200.000. Harga akhirnya adalah ....
+
+- [ ] Rp130.000
+- [ ] Rp140.000
+- [x] Rp135.000
+- [ ] Rp65.000
+
+## difficulty: high · NUM-SL12
+Tiga orang dapat mengecat pagar dalam 12 hari. Setelah bekerja 4 hari, datang 1 orang lagi membantu. Pagar selesai dicat dalam waktu total ....
+
+- [x] 10 hari
+- [ ] 9 hari
+- [ ] 8 hari
+- [ ] 12 hari
+
+## difficulty: high · NUM-SL13
+Perhatikan pola berikut:
+
+1, 1, 2, 3, 5, 8, 13, ...
+
+Bilangan berikutnya adalah ....
+
+- [ ] 18
+- [x] 21
+- [ ] 20
+- [ ] 26
+
+## difficulty: high · NUM-SL16
+Lampu A berkedip setiap 4 detik, lampu B setiap 6 detik, dan lampu C setiap 10 detik. Jika ketiganya berkedip bersamaan, mereka akan berkedip bersamaan lagi setelah ....
+
+- [ ] 20 detik
+- [ ] 30 detik
+- [x] 60 detik
+- [ ] 240 detik
+
+## difficulty: high · NUM-SL17
+Lima tahun yang lalu umur ayah 7 kali umur anaknya. Lima tahun yang akan datang umur ayah 3 kali umur anaknya. Umur anak sekarang adalah ....
+
+- [x] 10 tahun
+- [ ] 8 tahun
+- [ ] 12 tahun
+- [ ] 15 tahun
+
+## difficulty: high · NUM-SL18
+Dari angka 1, 2, 3, dan 4 akan dibuat bilangan dua angka dengan angka yang berbeda. Banyak bilangan genap yang dapat dibuat adalah ....
+
+- [ ] 8
+- [x] 6
+- [ ] 12
+- [ ] 4
+
+## difficulty: medium · ASLI 1.2
+Sebuah persegi panjang memiliki panjang 18 cm dan lebar 12 cm. Sebuah persegi dengan sisi 6 cm dipotong dari bagian tersebut. Luas yang tersisa adalah ....
+
+- [x] 180 cm²
+- [ ] 192 cm²
+- [ ] 168 cm²
+- [ ] 204 cm²
+
+## difficulty: medium · ASLI 1.8
+Sebuah kantin menyediakan 3 jenis makanan dan 4 jenis minuman. Seorang siswa memilih tepat satu makanan dan satu minuman. Banyak kombinasi pilihan yang mungkin adalah ....
+
+- [ ] 10
+- [ ] 14
+- [ ] 7
+- [x] 12
+
+## difficulty: medium · ASLI 1.9
+Perbandingan siswa laki-laki dan perempuan dalam sebuah kelas adalah 3 : 5. Jika jumlah seluruh siswa 32 orang, jumlah siswa perempuan adalah ....
+
+- [ ] 12
+- [ ] 16
+- [x] 20
+- [ ] 24
+
+## difficulty: medium · NUM-SD01
+Harga sebuah tas Rp80.000 dan mendapat diskon 15%. Harga yang harus dibayar adalah ....
+
+- [x] Rp68.000
+- [ ] Rp65.000
+- [ ] Rp72.000
+- [ ] Rp12.000
+
+## difficulty: medium · NUM-SD02
+Perbandingan kelereng Ani dan Budi adalah 2 : 3. Jika jumlah kelereng mereka 45 butir, banyak kelereng Budi adalah ....
+
+- [ ] 18
+- [ ] 30
+- [x] 27
+- [ ] 15
+
+## difficulty: medium · NUM-SD04
+Sebuah mobil membutuhkan 1 liter bensin untuk menempuh 12 km. Bensin yang dibutuhkan untuk menempuh 150 km adalah ....
+
+- [x] 12,5 liter
+- [ ] 12 liter
+- [ ] 15 liter
+- [ ] 13,5 liter
+
+## difficulty: medium · NUM-SD05
+Suatu pekerjaan dapat diselesaikan oleh 6 orang dalam 10 hari. Jika dikerjakan oleh 4 orang, pekerjaan itu selesai dalam ....
+
+- [ ] 12 hari
+- [ ] 8 hari
+- [x] 15 hari
+- [ ] 20 hari
+
+## difficulty: medium · NUM-SD06
+Luas segitiga dengan alas 14 cm dan tinggi 9 cm adalah ....
+
+- [ ] 126 cm²
+- [ ] 23 cm²
+- [x] 63 cm²
+- [ ] 58 cm²
+
+## difficulty: medium · NUM-SD07
+Keliling lingkaran dengan diameter 14 cm adalah .... (π = 22/7)
+
+- [ ] 88 cm
+- [x] 44 cm
+- [ ] 154 cm
+- [ ] 22 cm
+
+## difficulty: medium · NUM-SD08
+Rata-rata 4 bilangan adalah 25. Jika salah satu bilangan adalah 31, rata-rata tiga bilangan lainnya adalah ....
+
+- [x] 23
+- [ ] 25
+- [ ] 21
+- [ ] 24
+
+## difficulty: medium · NUM-SD09
+Perhatikan pola berikut:
+
+1, 4, 9, 16, 25, ...
+
+Bilangan berikutnya adalah ....
+
+- [ ] 30
+- [x] 36
+- [ ] 34
+- [ ] 49
+
+## difficulty: medium · NUM-SD10
+Pak Didi membeli barang seharga Rp50.000 dan menjualnya Rp60.000. Persentase keuntungannya adalah ....
+
+- [ ] 10%
+- [ ] 16,7%
+- [ ] 25%
+- [x] 20%
+
+## difficulty: medium · NUM-SD11
+Rina menabung Rp1.000.000 di bank dengan bunga tunggal 6% per tahun. Jumlah tabungan setelah 1 tahun adalah ....
+
+- [ ] Rp1.006.000
+- [ ] Rp1.600.000
+- [ ] Rp1.120.000
+- [x] Rp1.060.000
+
+## difficulty: medium · NUM-SD12
+Sebuah kolam berbentuk balok berukuran 2 m × 1,5 m × 1 m. Jika diisi penuh, volume air di kolam adalah ....
+
+- [ ] 300 liter
+- [x] 3.000 liter
+- [ ] 30.000 liter
+- [ ] 4.500 liter
+
+## difficulty: medium · NUM-SD13
+Hasil dari 0,75 + 2/5 adalah ....
+
+- [x] 1,15
+- [ ] 1,05
+- [ ] 0,95
+- [ ] 1,25
+
+## difficulty: medium · NUM-SD15
+Pada pukul 03.00, besar sudut terkecil yang dibentuk jarum jam dan jarum menit adalah ....
+
+- [ ] 60°
+- [ ] 120°
+- [x] 90°
+- [ ] 180°
+
+## difficulty: medium · NUM-SD16
+Dari 40 siswa, 25 siswa suka matematika, 18 siswa suka IPA, dan 8 siswa suka keduanya. Banyak siswa yang tidak suka keduanya adalah ....
+
+- [x] 5
+- [ ] 3
+- [ ] 8
+- [ ] 13
+
+## difficulty: medium · NUM-SD18
+Hasil dari √144 + √81 adalah ....
+
+- [ ] 15
+- [x] 21
+- [ ] 23
+- [ ] 225
+
+## difficulty: low · ASLI 1.1
+Sebuah sepeda menempuh jarak 36 km dalam waktu 3 jam. Kecepatan rata-ratanya adalah ....
+
+- [ ] 9 km/jam
+- [x] 12 km/jam
+- [ ] 18 km/jam
+- [ ] 15 km/jam
+
+## difficulty: low · ASLI 1.11
+Sebuah film dimulai pukul 08.45 dan berlangsung selama 1 jam 35 menit. Film selesai pada pukul ....
+
+- [x] 10.20
+- [ ] 10.10
+- [ ] 10.40
+- [ ] 10.30
+
+## difficulty: low · ASLI 1.13
+Nilai ulangan Dika adalah 70, 80, 75, 85, dan 90. Rata-ratanya adalah ....
+
+- [ ] 82
+- [x] 80
+- [ ] 85
+- [ ] 79
+
+## difficulty: low · NUM-M01
+Ibu membeli 3 kg apel dengan harga Rp24.000 per kg. Ibu membayar dengan uang Rp100.000. Uang kembalian yang diterima Ibu adalah ....
+
+- [ ] Rp18.000
+- [ ] Rp32.000
+- [x] Rp28.000
+- [ ] Rp38.000
+
+## difficulty: low · NUM-M02
+Sebuah bus berangkat pukul 06.50 dan tiba di tujuan pukul 09.15. Lama perjalanan bus tersebut adalah ....
+
+- [ ] 2 jam 35 menit
+- [x] 2 jam 25 menit
+- [ ] 3 jam 25 menit
+- [ ] 2 jam 15 menit
+
+## difficulty: low · NUM-M03
+Perhatikan pola berikut:
+
+5, 9, 13, 17, ...
+
+Bilangan berikutnya adalah ....
+
+- [ ] 20
+- [ ] 22
+- [ ] 25
+- [x] 21
+
+## difficulty: low · NUM-M04
+Rata-rata dari 6, 8, 7, 9, dan 10 adalah ....
+
+- [ ] 7
+- [ ] 9
+- [ ] 7,5
+- [x] 8
+
+## difficulty: low · NUM-M05
+Sebuah persegi panjang memiliki panjang 15 cm dan lebar 8 cm. Luasnya adalah ....
+
+- [ ] 46 cm²
+- [ ] 23 cm²
+- [x] 120 cm²
+- [ ] 130 cm²
+
+## difficulty: low · NUM-M06
+Keliling persegi dengan panjang sisi 12 cm adalah ....
+
+- [ ] 144 cm
+- [x] 48 cm
+- [ ] 24 cm
+- [ ] 36 cm
+
+## difficulty: low · NUM-M07
+Nilai dari 3/4 × 60 adalah ....
+
+- [ ] 40
+- [ ] 48
+- [ ] 15
+- [x] 45
+
+## difficulty: low · NUM-M08
+25% dari 80 adalah ....
+
+- [x] 20
+- [ ] 25
+- [ ] 16
+- [ ] 40
+
+## difficulty: low · NUM-M10
+Sebuah sepeda motor melaju dengan kecepatan rata-rata 40 km/jam selama 2,5 jam. Jarak yang ditempuh adalah ....
+
+- [ ] 80 km
+- [x] 100 km
+- [ ] 90 km
+- [ ] 120 km
+
+## difficulty: low · NUM-M11
+KPK dari 6 dan 8 adalah ....
+
+- [ ] 48
+- [x] 24
+- [ ] 12
+- [ ] 14
+
+## difficulty: low · NUM-M12
+FPB dari 12 dan 18 adalah ....
+
+- [ ] 3
+- [ ] 36
+- [ ] 9
+- [x] 6
+
+## difficulty: low · NUM-M15
+Harga 4 pensil adalah Rp10.000. Harga 7 pensil yang sama adalah ....
+
+- [ ] Rp14.000
+- [ ] Rp20.000
+- [x] Rp17.500
+- [ ] Rp17.000
+
+## difficulty: low · NUM-M16
+Suhu udara pada pagi hari −3°C. Pada siang hari suhu naik 8°C. Suhu pada siang hari adalah ....
+
+- [x] 5°C
+- [ ] 11°C
+- [ ] −11°C
+- [ ] −5°C
+
+## difficulty: low · NUM-M17
+Banyak bilangan prima antara 10 dan 20 adalah ....
+
+- [ ] 3
+- [x] 4
+- [ ] 5
+- [ ] 6
+
+## difficulty: low · NUM-M18
+Hasil dari 48 : 6 + 4 × 3 adalah ....
+
+- [x] 20
+- [ ] 36
+- [ ] 14
+- [ ] 24

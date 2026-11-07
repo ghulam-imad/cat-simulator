@@ -28,7 +28,19 @@ export interface Response {
 }
 
 export type View =
-  | { kind: "question"; subject: string; question: Question; selected: number[] }
+  | {
+      kind: "question";
+      subject: string;
+      question: Question;
+      selected: number[];
+      /** 1-based position of this Question within its Subject, out of `questionCount`. */
+      questionNumber: number;
+      questionCount: number;
+      /** Epoch ms when the Subject's Work Time ends; after this the Student is in Lag. */
+      workEndsAt: number;
+      /** Epoch ms when the Subject's Window closes. */
+      closesAt: number;
+    }
   | { kind: "waiting"; nextSubject: string; opensAt: number }
   | { kind: "finished"; subjects: SubjectResult[] };
 
@@ -103,7 +115,17 @@ export function viewAt(attempt: Attempt, at: number): View {
   const opensAt = attempt.startedAt + minutesToMs(windowOf(attempt.set, subjectIndex).opensAt);
   if (at < opensAt) return { kind: "waiting", nextSubject: subject.name, opensAt };
   const lastChange = attempt.selectionChanges.findLast((c) => c.questionId === question.id);
-  return { kind: "question", subject: subject.name, question, selected: lastChange?.selected ?? [] };
+  const window = windowOf(attempt.set, subjectIndex);
+  return {
+    kind: "question",
+    subject: subject.name,
+    question,
+    selected: lastChange?.selected ?? [],
+    questionNumber: attempt.responses.filter((r) => r.subjectIndex === subjectIndex).length + 1,
+    questionCount: questionsPerSubject(attempt.set, subjectIndex),
+    workEndsAt: attempt.startedAt + minutesToMs(window.workEndsAt),
+    closesAt: attempt.startedAt + minutesToMs(window.closesAt),
+  };
 }
 
 export interface Review {

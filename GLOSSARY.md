@@ -5,7 +5,7 @@ A practice tool where a parent writes timed, multiple-choice exercises and a chi
 ## Content
 
 **Exercise Set**:
-A numbered collection of Subjects that the Student practises in one sitting. Every Exercise Set is kept, even after the Parent writes a new one. Once an Exercise Set has been attempted, its Questions and Correct Options are never changed. Any such change makes a new Exercise Set.
+A collection of Subjects that the Student practises in one sitting, identified by its folder name: a number (`007` is Exercise Set 7) or a name (`labsky-001`). Every Exercise Set is kept, even after the Parent writes a new one. Once an Exercise Set has been attempted, its Questions and Correct Options are never changed. Any such change makes a new Exercise Set.
 _Avoid_: Pack, test, exam
 
 **Subject**:
