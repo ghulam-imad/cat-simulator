@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "tsx src/server/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
@@ -15,6 +16,10 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",
-    "hono": "^4.13.17"
+    "hono": "^4.13.17",
+    "tsx": "^4.23.15"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

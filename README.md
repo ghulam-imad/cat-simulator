@@ -5,10 +5,33 @@ The Parent writes Exercise Sets as Markdown files. The Student logs in with thei
 
 Everything runs on one home computer. There's no cloud and no accounts.
 
-> **Status:** the core is built and tested: the Attempt engine, the Exercise Set loader and the server API.
-> Still to come: `npm start`, the Student and Parent screens, and an example Exercise Set.
+> **Status:** the Attempt engine, the Exercise Set loader and the server API are built and tested, and `npm start` runs the server.
+> Still to come: the Student and Parent screens, and an example Exercise Set. Until then, the server only answers API requests.
 
 The words used here (Exercise Set, Subject, Pool, Lead, Lag, Attempt…) are defined in [GLOSSARY.md](GLOSSARY.md).
+
+## Getting started
+
+Requires Node 24 or later.
+
+```sh
+npm install
+cp cat-simulator.config.example.json cat-simulator.config.json
+# edit cat-simulator.config.json: your child's name(s) and a Parent PIN
+npm start
+```
+
+Then open http://localhost:3000. The server only listens on this computer.
+
+`cat-simulator.config.json` (kept out of git because it holds the PIN):
+
+| Setting | Meaning | Default |
+|---|---|---|
+| `students` | Names the Student can pick at login | (required) |
+| `parentPin` | PIN for the Parent review | (required) |
+| `setsDir` | Folder holding the Exercise Sets | `sets` |
+| `dbPath` | SQLite file where every Attempt is logged | `cat.sqlite` |
+| `port` | Port to serve on | `3000` |
 
 ## How a practice run works
 
@@ -107,7 +130,7 @@ Behind a Parent PIN, the review shows:
 Requires Node 24 or later (it uses the built-in `node:sqlite`).
 
 ```sh
-npm install
+npm start         # run the server (see Getting started)
 npm test          # Vitest
 npm run typecheck # tsc --noEmit
 ```
@@ -116,7 +139,8 @@ npm run typecheck # tsc --noEmit
 |---|---|
 | `src/engine/` | The Attempt engine: pure logic for Adaptive Selection, the shared clock, Score and review data. Time and randomness are passed in. |
 | `src/content/` | `loadExerciseSet(folder)`: reads and validates the Markdown files. |
-| `src/server/` | The Hono HTTP API over SQLite. Attempts are stored as events plus the random draws used, and rebuilt by replaying them through the engine. |
+| `src/server/` | The Hono HTTP API over SQLite. Attempts are stored as events plus the random draws used, and rebuilt by replaying them through the engine. `main.ts` is the `npm start` entry point. |
+| `sets/` | Your Exercise Sets, one numbered folder each. |
 | `GLOSSARY.md` | The domain language. |
 | `docs/agents/` | Notes for coding agents: issue tracker, triage labels, domain docs. |
 

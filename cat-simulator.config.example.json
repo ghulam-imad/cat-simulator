@@ -1,0 +1,7 @@
+{
+  "students": ["Your child's name"],
+  "parentPin": "change-me",
+  "setsDir": "sets",
+  "dbPath": "cat.sqlite",
+  "port": 3000
+}
