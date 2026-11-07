@@ -214,7 +214,7 @@ describe("Exercise Set names", () => {
     const summary = await call("GET", "/api/sets/LABSKY-001?student=Aisha");
 
     expect(again.body.attemptId).toBe(first.body.attemptId);
-    expect(summary.body).toMatchObject({ setNumber: "labsky-001", inProgress: true });
+    expect(summary.body).toMatchObject({ setNumber: "labsky-001", inProgress: { subjects: ["Math", "English"] } });
   });
 
   test("a numbered set resumes the same Attempt whether typed as 007 or 7", async () => {
@@ -241,9 +241,9 @@ describe("Start screen", () => {
         { name: "Math", workMinutes: 20, leadMinutes: 0, lagMinutes: 5, questionCount: 2 },
         { name: "English", workMinutes: 10, leadMinutes: 5, lagMinutes: 0, questionCount: 2 },
       ],
-      inProgress: false,
+      inProgress: null,
     });
-    expect(after.body.inProgress).toBe(true);
+    expect(after.body.inProgress).toEqual({ subjects: ["Math", "English"] });
   });
 
   test("an unknown Exercise Set number is reported before starting", async () => {
@@ -335,6 +335,7 @@ describe("Parent", () => {
         startedAt: minute(2),
         status: "in progress",
         score: 0,
+        skippedSubjects: [],
         subjects: [
           { subject: "Math", score: 0, correct: 0 },
           { subject: "English", score: 0, correct: 0 },
@@ -347,6 +348,7 @@ describe("Parent", () => {
         startedAt: T0,
         status: "finished",
         score: 2,
+        skippedSubjects: [],
         subjects: [
           { subject: "Math", score: 2, correct: 1 },
           { subject: "English", score: 0, correct: 0 },
@@ -437,5 +439,113 @@ describe("Parent", () => {
     const res = await call("DELETE", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
 
     expect(res).toEqual({ status: 409, body: { error: "Only an Attempt still in progress can be discarded." } });
+  });
+});
+
+/** Adds Exercise Set 8: Math (work 20, lag 5), Science (lead 5, work 10, lag 5), English (lead 5, work 10). Option "a" is right. */
+function addSet8(setsDir: string) {
+  const folder = join(setsDir, "008");
+  mkdirSync(folder);
+  const subjectFile = (name: string, times: string) => {
+    const blocks = ["high", "high", "medium", "medium", "low", "low"].map(
+      (d, i) => `## difficulty: ${d}\n${name} question ${i + 1} (${d})\n\n- [x] a\n- [ ] b\n- [ ] c\n- [ ] d\n`,
+    );
+    return `# ${name}\n${times}\n\n${blocks.join("\n")}`;
+  };
+  writeFileSync(join(folder, "1-math.md"), subjectFile("Math", "work: 20 min\nlag: 5 min"));
+  writeFileSync(join(folder, "2-science.md"), subjectFile("Science", "work: 10 min\nlead: 5 min\nlag: 5 min"));
+  writeFileSync(join(folder, "3-english.md"), subjectFile("English", "work: 10 min\nlead: 5 min"));
+}
+
+describe("Selected Subjects", () => {
+  const PIN = { "x-parent-pin": "4321" };
+
+  test("an Attempt can run only some Subjects, in the set's order, on a clock of just their Work Times", async () => {
+    const { call, clock, setsDir } = harness();
+    addSet8(setsDir);
+
+    const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["English", "Math"] });
+    expect(started.body).toMatchObject({
+      endsAt: minute(30),
+      view: { kind: "question", subject: "Math", workEndsAt: minute(20), closesAt: minute(25) },
+    });
+
+    clock.now = minute(1);
+    await call("POST", `/api/attempts/${started.body.attemptId}/responses`, { selected: [0] });
+    const afterMath = await call("POST", `/api/attempts/${started.body.attemptId}/responses`, { selected: [0] });
+    expect(afterMath.body.view).toEqual({ kind: "waiting", nextSubject: "English", opensAt: minute(15) });
+  });
+
+  test("Subjects that aren't in the Exercise Set, or none at all, are refused", async () => {
+    const { call, setsDir } = harness();
+    addSet8(setsDir);
+
+    expect(await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["Math", "Art"] })).toEqual({
+      status: 400,
+      body: { error: "Exercise Set 8 has no Subject Art." },
+    });
+    expect((await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: [] })).status).toBe(400);
+  });
+
+  test("logging in again resumes the Attempt with the Subjects it started with", async () => {
+    const { call, setsDir, clock } = harness();
+    addSet8(setsDir);
+    const started = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["Science"] });
+
+    clock.now = minute(1);
+    const summary = await call("GET", "/api/sets/8?student=Aisha");
+    const resumed = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8" });
+
+    expect(summary.body.inProgress).toEqual({ subjects: ["Science"] });
+    expect(resumed.body.attemptId).toBe(started.body.attemptId);
+    expect(resumed.body).toMatchObject({ endsAt: minute(10), view: { subject: "Science" } });
+  });
+
+  test("the Parent sees which Subjects an Attempt skipped, and Scores for only the ones it ran", async () => {
+    const { call, setsDir, clock } = harness();
+    addSet8(setsDir);
+    const partial = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "8", subjects: ["Math", "English"] });
+    clock.now = minute(1);
+    await call("POST", `/api/attempts/${partial.body.attemptId}/responses`, { selected: [0] });
+    const whole = await call("POST", "/api/attempts", { student: "Omar", setNumber: "8", subjects: ["Math", "Science", "English"] });
+
+    const list = await call("GET", "/api/parent/attempts", undefined, PIN);
+    const detail = await call("GET", `/api/parent/attempts/${partial.body.attemptId}`, undefined, PIN);
+
+    expect(list.body.attempts).toMatchObject([
+      { attemptId: whole.body.attemptId, skippedSubjects: [] },
+      {
+        attemptId: partial.body.attemptId,
+        skippedSubjects: ["Science"],
+        score: 2,
+        subjects: [
+          { subject: "Math", score: 2, correct: 1 },
+          { subject: "English", score: 0, correct: 0 },
+        ],
+      },
+    ]);
+    expect(detail.body.skippedSubjects).toEqual(["Science"]);
+    expect(detail.body.subjects.map((s: { subject: string }) => s.subject)).toEqual(["Math", "English"]);
+  });
+
+  test("Attempts saved before Subjects could be picked still open, as runs of every Subject", async () => {
+    const setsDir = setsDirWithSet7();
+    const dbPath = join(mkdtempSync(join(tmpdir(), "cat-db-")), "cat.sqlite");
+    const old = new DatabaseSync(dbPath);
+    old.exec(`
+      CREATE TABLE attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, student TEXT NOT NULL, set_number TEXT NOT NULL,
+        started_at INTEGER NOT NULL, random_values TEXT NOT NULL DEFAULT '[]', discarded_at INTEGER
+      );
+      INSERT INTO attempts (student, set_number, started_at) VALUES ('Aisha', '7', ${T0});
+    `);
+    old.close();
+
+    const app = createApp({ db: new DatabaseSync(dbPath), setsDir, students: ["Aisha"], parentPin: "4321", now: () => minute(1) });
+    const res = await app.request("/api/parent/attempts", { headers: PIN });
+
+    expect(((await res.json()) as any).attempts).toMatchObject([
+      { student: "Aisha", skippedSubjects: [], subjects: [{ subject: "Math" }, { subject: "English" }] },
+    ]);
   });
 });

@@ -28,7 +28,8 @@ export interface SetSummary {
   setNumber: string;
   totalMinutes: number;
   subjects: { name: string; workMinutes: number; leadMinutes: number; lagMinutes: number; questionCount: number }[];
-  inProgress: boolean;
+  /** The Student's unfinished Attempt at this set, and the Subjects it runs; `null` when there is none. */
+  inProgress: { subjects: string[] } | null;
 }
 
 export interface AttemptListItem {
@@ -38,6 +39,8 @@ export interface AttemptListItem {
   startedAt: number;
   status: "in progress" | "finished";
   score: number;
+  /** Subjects of the Exercise Set this Attempt left out; empty when it ran them all. */
+  skippedSubjects: string[];
   subjects: { subject: string; score: number; correct: number }[];
 }
 
@@ -57,6 +60,7 @@ export interface AttemptDetail {
   student: string;
   setNumber: string;
   startedAt: number;
+  skippedSubjects: string[];
   interruptions: { from: number; to: number; subject: string; questionNumber?: number }[];
   subjects: { subject: string; timedOut: boolean; difficultyPath: Difficulty[]; responses: ReviewedResponse[] }[];
 }

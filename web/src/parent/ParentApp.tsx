@@ -148,6 +148,26 @@ function StatusPill({ status }: { status: AttemptListItem["status"] }) {
   );
 }
 
+/** A half-filled circle: "only part of the set". Drawn, so it never depends on the font having the glyph. */
+function HalfIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true" style={{ flex: "none" }}>
+      <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 1 A5 5 0 0 0 6 11 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Marks an Attempt that ran only the Subjects the Student picked. Shape + label, not colour alone. */
+function PartialPill({ skipped }: { skipped: string[] }) {
+  if (skipped.length === 0) return null;
+  return (
+    <span className="pill partial" title={`Dilewati: ${skipped.join(", ")}`}>
+      <HalfIcon /> Subtes terpilih
+    </span>
+  );
+}
+
 function AttemptList({ call }: { call: Call }) {
   const { attempts, error } = useAttempts(call);
   const [student, setStudent] = useState("");
@@ -193,7 +213,10 @@ function AttemptList({ call }: { call: Call }) {
                 <td>{a.student}</td>
                 <td className="num">{a.setNumber}</td>
                 <td>
-                  <StatusPill status={a.status} />
+                  <div className="pill-stack">
+                    <StatusPill status={a.status} />
+                    <PartialPill skipped={a.skippedSubjects} />
+                  </div>
                 </td>
                 <td className="num">
                   <strong>{a.score}</strong>
@@ -249,6 +272,12 @@ function AttemptView({ id, call }: { id: string; call: Call }) {
                   {detail.student} · Paket soal {detail.setNumber}
                 </h2>
                 <div className="secondary small">Dimulai {formatDateTime(detail.startedAt)}</div>
+                {detail.skippedSubjects.length > 0 && (
+                  <div className="row small" style={{ marginTop: 8, gap: 8 }}>
+                    <PartialPill skipped={detail.skippedSubjects} />
+                    <span className="secondary">Dilewati: {detail.skippedSubjects.join(", ")}</span>
+                  </div>
+                )}
               </div>
               <span className="spacer" />
               {summary && (
@@ -483,6 +512,11 @@ function Progress({ call }: { call: Call }) {
                   );
                 })}
                 <td className="num">
+                  {a.skippedSubjects.length > 0 && (
+                    <span className="muted" title={`Hanya subtes terpilih. Dilewati: ${a.skippedSubjects.join(", ")}`}>
+                      <HalfIcon />{" "}
+                    </span>
+                  )}
                   <strong>{a.score}</strong>
                 </td>
               </tr>
@@ -490,6 +524,11 @@ function Progress({ call }: { call: Call }) {
           </tbody>
         </table>
       </div>
+      {finished.some((a) => a.skippedSubjects.length > 0) && (
+        <p className="muted small">
+          <HalfIcon /> Hanya subtes terpilih: totalnya tidak sebanding dengan pengerjaan semua subtes.
+        </p>
+      )}
     </div>
   );
 }

@@ -212,11 +212,23 @@ function Start({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [choosing, setChoosing] = useState(false);
+  // An Attempt in progress keeps the Subjects it started with; otherwise every Subject is picked until unticked.
+  const [picked, setPicked] = useState<string[]>(() => summary.inProgress?.subjects ?? summary.subjects.map((s) => s.name));
+  const resuming = summary.inProgress !== null;
+  const shown = resuming ? summary.subjects.filter((s) => picked.includes(s.name)) : summary.subjects;
+  const runs = shown.filter((s) => picked.includes(s.name));
+  const totalMinutes = runs.reduce((sum, s) => sum + s.workMinutes, 0);
+  const partial = runs.length < summary.subjects.length;
+
+  const toggle = (name: string) =>
+    setPicked((now) => (now.includes(name) ? now.filter((n) => n !== name) : [...now, name]));
 
   const start = async () => {
     setBusy(true);
     try {
-      onStarted(await api<StudentReply>("POST", "/api/attempts", session));
+      const body = !resuming && partial ? { ...session, subjects: picked } : session;
+      onStarted(await api<StudentReply>("POST", "/api/attempts", body));
     } catch (err) {
       setError(loginErrorText(err));
       setBusy(false);
@@ -233,39 +245,84 @@ function Start({
           <table>
             <thead>
               <tr>
+                {choosing && (
+                  <th className="pick">
+                    <span className="visually-hidden">Kerjakan</span>
+                  </th>
+                )}
                 <th>Subtes</th>
                 <th className="num">Soal</th>
                 <th className="num">Waktu</th>
               </tr>
             </thead>
             <tbody>
-              {summary.subjects.map((s) => (
-                <tr key={s.name}>
-                  <td>{s.name}</td>
-                  <td className="num">{s.questionCount}</td>
-                  <td className="num">{s.workMinutes} menit</td>
-                </tr>
-              ))}
+              {shown.map((s) => {
+                const on = picked.includes(s.name);
+                return (
+                  <tr key={s.name} className={on ? undefined : "skipped"}>
+                    {choosing && (
+                      <td className="pick">
+                        <input
+                          type="checkbox"
+                          id={`pick-${s.name}`}
+                          checked={on}
+                          onChange={() => toggle(s.name)}
+                          disabled={busy}
+                        />
+                      </td>
+                    )}
+                    <td>
+                      {choosing ? <label htmlFor={`pick-${s.name}`}>{s.name}</label> : s.name}
+                      {!on && <span className="muted small"> · dilewati</span>}
+                    </td>
+                    <td className="num">{s.questionCount}</td>
+                    <td className="num">{s.workMinutes} menit</td>
+                  </tr>
+                );
+              })}
               <tr>
+                {choosing && <td />}
                 <td>
                   <strong>Total</strong>
                 </td>
                 <td />
                 <td className="num">
-                  <strong>{summary.totalMinutes} menit</strong>
+                  <strong>{totalMinutes} menit</strong>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        {summary.inProgress ? (
-          <p>Kamu sudah mulai mengerjakan paket ini dan waktunya tetap berjalan. Tekan Lanjutkan untuk kembali.</p>
+        {resuming ? (
+          <>
+            {partial && <p className="muted small">Kamu hanya mengerjakan subtes yang dipilih.</p>}
+            <p>Kamu sudah mulai mengerjakan paket ini dan waktunya tetap berjalan. Tekan Lanjutkan untuk kembali.</p>
+          </>
         ) : (
-          <ul className="secondary">
-            <li>Setelah kamu menekan Mulai, waktu berjalan untuk semua subtes.</li>
-            <li>Jawab setiap soal, lalu tekan Lanjut. Kamu tidak bisa kembali ke soal sebelumnya.</li>
-            <li>Jika ada tulisan "Pilih semua jawaban yang benar", centang semua jawaban yang benar.</li>
-          </ul>
+          <>
+            <div className="advanced">
+              <button
+                type="button"
+                className="link"
+                aria-expanded={choosing}
+                onClick={() => setChoosing((open) => !open)}
+                disabled={busy}
+              >
+                {choosing ? "▾" : "▸"} Opsi lanjutan: pilih subtes
+              </button>
+              {choosing && (
+                <p className="muted small">
+                  Hapus centang subtes yang tidak ingin dikerjakan. Urutan, waktu, dan skor tetap mengikuti paket soal.
+                </p>
+              )}
+              {runs.length === 0 && <div className="error">Pilih paling sedikit satu subtes.</div>}
+            </div>
+            <ul className="secondary">
+              <li>Setelah kamu menekan Mulai, waktu berjalan untuk semua subtes{partial ? " yang dipilih" : ""}.</li>
+              <li>Jawab setiap soal, lalu tekan Lanjut. Kamu tidak bisa kembali ke soal sebelumnya.</li>
+              <li>Jika ada tulisan "Pilih semua jawaban yang benar", centang semua jawaban yang benar.</li>
+            </ul>
+          </>
         )}
         {error && <div className="error">{error}</div>}
         <div className="row">
@@ -273,8 +330,8 @@ function Start({
             Kembali
           </button>
           <span className="spacer" />
-          <button className="primary" onClick={start} disabled={busy}>
-            {summary.inProgress ? "Lanjutkan" : "Mulai"}
+          <button className="primary" onClick={start} disabled={busy || runs.length === 0}>
+            {resuming ? "Lanjutkan" : "Mulai"}
           </button>
         </div>
       </div>

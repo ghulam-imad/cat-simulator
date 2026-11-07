@@ -71,6 +71,10 @@ _Avoid_: Admin, teacher
 One run of an Exercise Set by one Student, from start to finish. Its shared clock keeps running in real time even while the page is closed, and reopening the page resumes the Attempt. Retaking an Exercise Set creates a new Attempt, and every Attempt is kept.
 _Avoid_: Session, test run, try
 
+**Selected Subjects**:
+The Subjects a Student chose to run in an Attempt, when they leave some of the Exercise Set's Subjects out. They keep the set's order and their own Work Time, Lead and Lag, except that the first has no Lead and the last has no Lag, and no Lead or Lag reaches past the neighbouring Subject's Work Time. An Attempt with every Subject has no Selected Subjects to mention.
+_Avoid_: Custom run, partial set
+
 **Interruption**:
 A period during an Attempt when the Student's page was closed. The clock keeps running through it.
 _Avoid_: Pause, break

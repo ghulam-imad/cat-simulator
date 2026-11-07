@@ -5,6 +5,7 @@ import { type Context, Hono } from "hono";
 import { loadExerciseSet, setName } from "../content/load-exercise-set.js";
 import { type Attempt, changeSelection, reviewAt, startAttempt, submitResponse, type View, viewAt } from "../engine/attempt.js";
 import type { ExerciseSet } from "../engine/exercise-set.js";
+import { selectSubjects } from "../engine/select-subjects.js";
 import { type AttemptRow, AttemptStore } from "./attempt-store.js";
 
 export interface AppOptions {
@@ -29,6 +30,16 @@ export function createApp(opts: AppOptions) {
     return loaded.set;
   };
 
+  /** The Exercise Set as this Attempt runs it: only its Selected Subjects, if it picked some. */
+  const setFor = (row: AttemptRow): ExerciseSet => {
+    const set = loadSet(row.setNumber);
+    return row.subjects ? selectSubjects(set, row.subjects) : set;
+  };
+
+  /** The Exercise Set's Subjects this Attempt left out, in the set's order. */
+  const skippedSubjects = (row: AttemptRow): string[] =>
+    row.subjects ? loadSet(row.setNumber).subjects.map((s) => s.name).filter((name) => !row.subjects!.includes(name)) : [];
+
   /**
    * Rebuilds an Attempt by replaying its saved events through the engine.
    * Saved random numbers are reused first; any new ones drawn are saved for the next replay.
@@ -40,7 +51,7 @@ export function createApp(opts: AppOptions) {
       if (next === values.length) values.push(random());
       return values[next++]!;
     };
-    let attempt = startAttempt(loadSet(row.setNumber), {
+    let attempt = startAttempt(setFor(row), {
       student: row.student,
       startedAt: row.startedAt,
       random: replayingRandom,
@@ -128,7 +139,10 @@ export function createApp(opts: AppOptions) {
       setNumber: checked.set.number,
       totalMinutes: subjects.reduce((sum, s) => sum + s.workMinutes, 0),
       subjects,
-      inProgress: inProgressAttempt(student, checked.set.number) !== undefined,
+      inProgress: (() => {
+        const open = inProgressAttempt(student, checked.set.number);
+        return open ? { subjects: open.attempt.set.subjects.map((s) => s.name) } : null;
+      })(),
     });
   });
 
@@ -143,16 +157,26 @@ export function createApp(opts: AppOptions) {
   });
 
   app.post("/api/attempts", async (c) => {
-    const { student, setNumber } = await c.req.json<{ student: string; setNumber: string }>();
+    const { student, setNumber, subjects } = await c.req.json<{ student: string; setNumber: string; subjects?: string[] }>();
     const checked = checkLogin(student, setNumber);
     if (!checked.set) return c.json(checked.error, checked.status);
+    if (subjects !== undefined) {
+      try {
+        if (!Array.isArray(subjects)) throw new Error("Subjects must be a list of Subject names.");
+        selectSubjects(checked.set, subjects);
+      } catch (refusal) {
+        return c.json({ error: (refusal as Error).message }, 400);
+      }
+    }
     // Saved under the set's own name, so "007"/"7" or "Labsky-001"/"labsky-001" resume the same Attempt.
     const open = inProgressAttempt(student, checked.set.number);
     if (open) {
       store.append(open.row.id, { kind: "heartbeat", at: now() });
       return c.json({ attemptId: open.row.id, ...studentReply(open.attempt) });
     }
-    const attemptId = store.create(student, checked.set.number, now());
+    // An Attempt that picked every Subject is saved as an ordinary one.
+    const picked = subjects && checked.set.subjects.some((s) => !subjects.includes(s.name)) ? subjects : undefined;
+    const attemptId = store.create(student, checked.set.number, now(), picked);
     const { attempt, saveDraws } = rebuild(store.get(attemptId)!);
     saveDraws();
     return c.json({ attemptId, ...studentReply(attempt) });
@@ -205,6 +229,7 @@ export function createApp(opts: AppOptions) {
           startedAt: row.startedAt,
           status: viewAt(attempt, now()).kind === "finished" ? "finished" : "in progress",
           score: subjects.reduce((sum, s) => sum + s.score, 0),
+          skippedSubjects: skippedSubjects(row),
           subjects,
         };
       }),
@@ -221,6 +246,7 @@ export function createApp(opts: AppOptions) {
       student: row.student,
       setNumber: row.setNumber,
       startedAt: row.startedAt,
+      skippedSubjects: skippedSubjects(row),
       ...reviewAt(attempt, now()),
     });
   });

@@ -536,3 +536,46 @@ tr.clickable:hover td {
   color: var(--ink);
   font-weight: 600;
 }
+
+/* Picking Subjects on the Start screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+th.pick,
+td.pick {
+  width: 1%;
+  padding-right: 0;
+}
+td.pick input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+tr.skipped td {
+  color: var(--ink-muted);
+}
+tr.skipped td label {
+  text-decoration: line-through;
+}
+.advanced > * + * {
+  margin-top: 8px;
+}
+.advanced p {
+  margin-bottom: 0;
+}
+.pill.partial {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--ink);
+}
+.pill-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

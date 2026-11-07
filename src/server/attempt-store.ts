@@ -5,6 +5,8 @@ export interface AttemptRow {
   student: string;
   setNumber: string;
   startedAt: number;
+  /** The Selected Subjects, by name; `undefined` means every Subject of the Exercise Set. */
+  subjects?: string[];
   /** Every random number the engine has drawn, in order, so replaying gives the same Questions. */
   randomValues: number[];
 }
@@ -25,7 +27,8 @@ export class AttemptStore {
         set_number TEXT NOT NULL,
         started_at INTEGER NOT NULL,
         random_values TEXT NOT NULL DEFAULT '[]',
-        discarded_at INTEGER
+        discarded_at INTEGER,
+        subjects TEXT
       );
       CREATE TABLE IF NOT EXISTS attempt_events (
         attempt_id INTEGER NOT NULL REFERENCES attempts(id),
@@ -36,12 +39,16 @@ export class AttemptStore {
         PRIMARY KEY (attempt_id, seq)
       );
     `);
+    // Databases from before Subjects could be picked: their Attempts ran every Subject.
+    const columns = db.prepare("PRAGMA table_info(attempts)").all().map((c) => String(c.name));
+    if (!columns.includes("subjects")) db.exec("ALTER TABLE attempts ADD COLUMN subjects TEXT");
   }
 
-  create(student: string, setNumber: string, startedAt: number): string {
+  /** `subjects` is left out when the Attempt runs every Subject. */
+  create(student: string, setNumber: string, startedAt: number, subjects?: string[]): string {
     const result = this.db
-      .prepare("INSERT INTO attempts (student, set_number, started_at) VALUES (?, ?, ?)")
-      .run(student, setNumber, startedAt);
+      .prepare("INSERT INTO attempts (student, set_number, started_at, subjects) VALUES (?, ?, ?, ?)")
+      .run(student, setNumber, startedAt, subjects ? JSON.stringify(subjects) : null);
     return String(result.lastInsertRowid);
   }
 
@@ -102,6 +109,7 @@ function toAttemptRow(row: Record<string, unknown>): AttemptRow {
     student: String(row.student),
     setNumber: String(row.set_number),
     startedAt: Number(row.started_at),
+    ...(row.subjects == null ? {} : { subjects: JSON.parse(String(row.subjects)) as string[] }),
     randomValues: JSON.parse(String(row.random_values)) as number[],
   };
 }

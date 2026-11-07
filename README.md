@@ -55,6 +55,7 @@ If another device can't connect even though it's on the Wi-Fi, this computer's f
 ## How a practice run works
 
 1. The Student picks their name, chooses the Exercise Set from a list (e.g. `7` or `labsky-001`) and presses **Mulai** (Start) once.
+   Under **Opsi lanjutan** they can untick Subjects to practise only some of them. The picked Subjects still run in the set's order, with their own Work Time, Lead and Lag, Adaptive Selection and Scoring. The first picked Subject has no Lead and the last has no Lag, and a Lead or Lag never runs past the neighbouring Subject's Work Time. The total time is the sum of the picked Work Times.
 2. Subjects run one after another on **one shared clock**. Each Subject has a **Work Time**, plus an optional **Lead** (it may open early) and **Lag** (it may run late).
 3. **Adaptive Selection:** each Subject starts with a Medium Question. A correct Response moves the next Question up one Difficulty and a wrong one moves it down. Questions are never repeated.
 4. There's no going back and no skipping. A Subject ends when every Question is answered or its Window closes. Unanswered Questions are **Timed Out**.
@@ -156,7 +157,7 @@ Once an Exercise Set has been attempted, fix typos only. Changing Questions or a
 
 Behind a Parent PIN, the review shows:
 
-- **All Attempts**, newest first, with status, total Score and the Score for each Subject.
+- **All Attempts**, newest first, with status, total Score and the Score for each Subject. An Attempt that ran only some Subjects is marked **Subtes terpilih**, and its page lists the Subjects it skipped. On the Progress tab its total is marked too, since it can't be compared with a full run.
 - **One Attempt in detail:** for every Response, the Question, what was picked, the Correct Options, points, time spent, whether it was given during Lag, and how the ticks changed before submitting. Each Subject also shows its Difficulty Path and whether it Timed Out. **Interruptions** (when the page was closed) are listed with the Subject and Question number.
 - **Discard**: an in-progress Attempt can be thrown away.
 
