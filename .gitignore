@@ -5,3 +5,4 @@ cat-simulator.config.json
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+ecosystem.config.cjs

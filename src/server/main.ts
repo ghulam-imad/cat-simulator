@@ -22,17 +22,26 @@ interface Config {
 }
 
 const CONFIG_FILE = "cat-simulator.config.json";
+/** Set by pm2 (ecosystem.config.cjs): the same settings as the config file, as JSON. Used instead of the file. */
+const CONFIG_ENV = "CAT_SIMULATOR_CONFIG";
 
 function readConfig(): Config {
-  if (!existsSync(CONFIG_FILE)) {
+  const fromEnv = process.env[CONFIG_ENV];
+  const source = fromEnv ? CONFIG_ENV : CONFIG_FILE;
+  if (!fromEnv && !existsSync(CONFIG_FILE)) {
     fail(
       `Missing ${CONFIG_FILE}.\n` +
         `Copy cat-simulator.config.example.json to ${CONFIG_FILE} and put in your Students' names and a Parent PIN.`,
     );
   }
-  const config = JSON.parse(readFileSync(CONFIG_FILE, "utf8")) as Partial<Config>;
-  if (!Array.isArray(config.students) || config.students.length === 0) fail(`${CONFIG_FILE}: "students" needs at least one name.`);
-  if (typeof config.parentPin !== "string" || config.parentPin === "") fail(`${CONFIG_FILE}: "parentPin" is missing.`);
+  let config: Partial<Config>;
+  try {
+    config = JSON.parse(fromEnv ?? readFileSync(CONFIG_FILE, "utf8")) as Partial<Config>;
+  } catch (err) {
+    fail(`${source} isn't valid JSON: ${(err as Error).message}`);
+  }
+  if (!Array.isArray(config.students) || config.students.length === 0) fail(`${source}: "students" needs at least one name.`);
+  if (typeof config.parentPin !== "string" || config.parentPin === "") fail(`${source}: "parentPin" is missing.`);
   return config as Config;
 }
 

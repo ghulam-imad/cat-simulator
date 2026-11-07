@@ -52,6 +52,32 @@ If another device can't connect even though it's on the Wi-Fi, this computer's f
 | `host` | `0.0.0.0` accepts other devices; `127.0.0.1` accepts this computer only | `0.0.0.0` |
 | `allowedNetworks` | Networks other devices may connect from, e.g. `["10.10.50.0/24"]` for every `10.10.50.x` address. This computer is always allowed. | `[]` (this computer only) |
 
+### Keeping it running (pm2)
+
+To keep the app running in the background, restart it if it crashes and start it again after a reboot, run it with [pm2](https://pm2.keymetrics.io/). pm2 is installed globally and is not part of this project:
+
+```sh
+npm install -g pm2
+cp ecosystem.config.example.cjs ecosystem.config.cjs
+# edit ecosystem.config.cjs: the same settings as cat-simulator.config.json go in `config`,
+# and `interpreter` should be the full path from `which node`
+npm run build
+pm2 start ecosystem.config.cjs
+pm2 save        # remember the running app
+pm2 startup     # prints a sudo command; run it once so pm2 starts at boot
+```
+
+`ecosystem.config.cjs` holds the settings itself, so `cat-simulator.config.json` isn't used under pm2. It is kept out of git because it holds the PIN. The `interpreter` is a full path because a version manager's `node` (fnm, nvm) is usually only on the PATH inside a shell, which a boot-time start doesn't have.
+
+| Task | Command |
+|---|---|
+| Status | `pm2 status` |
+| Start-up output and errors | `pm2 logs cat-simulator` |
+| After pulling changes or changing `config` | `npm run build && pm2 reload ecosystem.config.cjs --update-env` |
+| Stop | `pm2 stop cat-simulator` |
+
+Exercise Sets are read from disk on each login, so a new set appears without a restart.
+
 ## How a practice run works
 
 1. The Student picks their name, chooses the Exercise Set from a list (e.g. `7` or `labsky-001`) and presses **Mulai** (Start) once.
