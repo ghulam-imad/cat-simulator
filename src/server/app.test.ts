@@ -374,6 +374,8 @@ describe("Parent", () => {
         setNumber: "7",
         startedAt: minute(2),
         status: "in progress",
+        finishedAt: null,
+        totalMinutes: 30,
         score: 0,
         skippedSubjects: [],
         focusLosses: { count: 0, seconds: 0 },
@@ -388,6 +390,8 @@ describe("Parent", () => {
         setNumber: "7",
         startedAt: T0,
         status: "finished",
+        finishedAt: minute(30), // ran out of time
+        totalMinutes: 30,
         score: 1,
         skippedSubjects: [],
         focusLosses: { count: 0, seconds: 0 },
@@ -397,6 +401,20 @@ describe("Parent", () => {
         ],
       },
     ]);
+  });
+
+  test("an Attempt whose every Question was answered finished at its last Response", async () => {
+    const { call, clock, answer } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    for (const m of [1, 2, 16, 17]) {
+      clock.now = minute(m); // English opens at 15, its Lead
+      await answer(body.attemptId, "a");
+    }
+
+    clock.now = minute(18);
+    const res = await call("GET", "/api/parent/attempts", undefined, PIN);
+
+    expect(res.body.attempts[0]).toMatchObject({ status: "finished", startedAt: T0, finishedAt: minute(17), totalMinutes: 30 });
   });
 
   test("opening an Attempt shows every Response in detail, with the Correct Options", async () => {

@@ -141,6 +141,16 @@ export function viewAt(attempt: Attempt, at: number): View {
   };
 }
 
+/**
+ * When the Attempt finished, if it has by time `at`: at its last Response when every Subject's
+ * Questions were answered, otherwise when the last Subject's Window closed.
+ */
+export function finishedAt(attempt: Attempt, at: number): number | undefined {
+  if (positionAt(attempt, at) !== "finished") return undefined;
+  if (attempt.cursor === "finished") return attempt.responses.at(-1)!.submittedAt;
+  return attempt.startedAt + minutesToMs(windowOf(attempt.set, attempt.set.subjects.length - 1).closesAt);
+}
+
 export interface Review {
   subjects: { subject: string; timedOut: boolean; difficultyPath: Difficulty[]; responses: ReviewedResponse[] }[];
 }

@@ -249,6 +249,7 @@ function AttemptList({ call }: { call: Call }) {
               <th>Siswa</th>
               <th className="num">Paket</th>
               <th>Status</th>
+              <th className="num">Lama pengerjaan</th>
               <th className="num">Skor</th>
               <th>Per subtes</th>
             </tr>
@@ -269,6 +270,16 @@ function AttemptList({ call }: { call: Call }) {
                     <PartialPill skipped={a.skippedSubjects} />
                     <FocusLossPill {...a.focusLosses} />
                   </div>
+                </td>
+                <td className="num">
+                  {a.finishedAt === null ? (
+                    <span className="muted">–</span>
+                  ) : (
+                    <>
+                      <div className="nowrap">{formatSeconds((a.finishedAt - a.startedAt) / 1000)}</div>
+                      <div className="small muted nowrap">dari {a.totalMinutes} mnt</div>
+                    </>
+                  )}
                 </td>
                 <td className="num">
                   <strong>{a.score}</strong>

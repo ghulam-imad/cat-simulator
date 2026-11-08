@@ -3,7 +3,7 @@ import { extname, join, resolve, sep } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { type Context, Hono } from "hono";
 import { loadExerciseSet, setName } from "../content/load-exercise-set.js";
-import { type Attempt, changeSelection, reviewAt, startAttempt, submitResponse, type View, viewAt } from "../engine/attempt.js";
+import { type Attempt, changeSelection, finishedAt, reviewAt, startAttempt, submitResponse, type View, viewAt } from "../engine/attempt.js";
 import type { ExerciseSet } from "../engine/exercise-set.js";
 import { selectSubjects } from "../engine/select-subjects.js";
 import { type AttemptRow, AttemptStore, type FocusLossRow } from "./attempt-store.js";
@@ -263,6 +263,9 @@ export function createApp(opts: AppOptions) {
           setNumber: row.setNumber,
           startedAt: row.startedAt,
           status: viewAt(attempt, now()).kind === "finished" ? "finished" : "in progress",
+          finishedAt: finishedAt(attempt, now()) ?? null,
+          // The planned time of the Subjects this Attempt ran.
+          totalMinutes: attempt.set.subjects.reduce((sum, s) => sum + s.workMinutes, 0),
           score: subjects.reduce((sum, s) => sum + s.score, 0),
           skippedSubjects: skippedSubjects(row),
           focusLosses: (() => {

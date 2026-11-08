@@ -38,6 +38,10 @@ export interface AttemptListItem {
   setNumber: string;
   startedAt: number;
   status: "in progress" | "finished";
+  /** When it finished (its last Response, or when time ran out); `null` while in progress. */
+  finishedAt: number | null;
+  /** The planned time of the Subjects it ran. */
+  totalMinutes: number;
   score: number;
   /** Subjects of the Exercise Set this Attempt left out; empty when it ran them all. */
   skippedSubjects: string[];

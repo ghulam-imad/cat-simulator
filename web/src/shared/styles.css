@@ -579,3 +579,7 @@ tr.skipped td label {
   flex-wrap: wrap;
   gap: 4px;
 }
+
+.nowrap {
+  white-space: nowrap;
+}
