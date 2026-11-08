@@ -19,6 +19,17 @@ export type AttemptEvent =
   /** The Student's page is open: sent every few seconds, and on logging in again. */
   | { kind: "heartbeat"; at: number };
 
+/**
+ * A Focus Loss: the page stayed open but wasn't in front. `hidden` means it couldn't be seen
+ * (another tab, another app, a minimised window, a locked screen); `blurred` means it could be
+ * seen but another window was being used.
+ */
+export interface FocusLossRow {
+  from: number;
+  to: number;
+  how: "hidden" | "blurred";
+}
+
 /** Saves Attempts as their start plus an append-only list of events. */
 export class AttemptStore {
   constructor(private db: DatabaseSync) {
@@ -40,6 +51,12 @@ export class AttemptStore {
         selected TEXT,
         at INTEGER NOT NULL,
         PRIMARY KEY (attempt_id, seq)
+      );
+      CREATE TABLE IF NOT EXISTS focus_losses (
+        attempt_id INTEGER NOT NULL REFERENCES attempts(id),
+        from_at INTEGER NOT NULL,
+        to_at INTEGER NOT NULL,
+        how TEXT NOT NULL
       );
     `);
     // Databases from before Subjects could be picked: their Attempts ran every Subject.
@@ -90,6 +107,20 @@ export class AttemptStore {
          VALUES (?, (SELECT COUNT(*) FROM attempt_events WHERE attempt_id = ?), ?, ?, ?)`,
       )
       .run(id, id, event.kind, "selected" in event ? JSON.stringify(event.selected) : null, event.at);
+  }
+
+  addFocusLoss(id: string, loss: FocusLossRow): void {
+    this.db
+      .prepare("INSERT INTO focus_losses (attempt_id, from_at, to_at, how) VALUES (?, ?, ?, ?)")
+      .run(id, loss.from, loss.to, loss.how);
+  }
+
+  /** The Attempt's Focus Losses, earliest first. */
+  focusLosses(id: string): FocusLossRow[] {
+    return this.db
+      .prepare("SELECT from_at, to_at, how FROM focus_losses WHERE attempt_id = ? ORDER BY from_at")
+      .all(id)
+      .map((row) => ({ from: Number(row.from_at), to: Number(row.to_at), how: row.how as FocusLossRow["how"] }));
   }
 
   events(id: string): AttemptEvent[] {

@@ -376,6 +376,7 @@ describe("Parent", () => {
         status: "in progress",
         score: 0,
         skippedSubjects: [],
+        focusLosses: { count: 0, seconds: 0 },
         subjects: [
           { subject: "Math", score: 0, correct: 0 },
           { subject: "English", score: 0, correct: 0 },
@@ -389,6 +390,7 @@ describe("Parent", () => {
         status: "finished",
         score: 1,
         skippedSubjects: [],
+        focusLosses: { count: 0, seconds: 0 },
         subjects: [
           { subject: "Math", score: 1, correct: 1 },
           { subject: "English", score: 0, correct: 0 },
@@ -496,6 +498,93 @@ function addSet8(setsDir: string) {
   writeFileSync(join(folder, "2-science.md"), subjectFile("Science", "work: 10 min\nlead: 5 min\nlag: 5 min"));
   writeFileSync(join(folder, "3-english.md"), subjectFile("English", "work: 10 min\nlead: 5 min"));
 }
+
+describe("Focus Losses", () => {
+  const PIN = { "x-parent-pin": "4321" };
+  const seconds = (s: number) => T0 + s * 1000;
+
+  test("the Parent sees when the page lost focus, for how long, how, and on which Question", async () => {
+    const { call, clock, answer } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    clock.now = minute(1);
+    await answer(body.attemptId, "a"); // now on Math, Question 2
+    clock.now = minute(3);
+    const report = await call("POST", `/api/attempts/${body.attemptId}/focus-losses`, { awayMs: 45_000, how: "hidden" });
+    clock.now = minute(4);
+    await call("POST", `/api/attempts/${body.attemptId}/focus-losses`, { awayMs: 5_000, how: "blurred" });
+
+    const detail = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
+    const list = await call("GET", "/api/parent/attempts", undefined, PIN);
+
+    expect(report.status).toBe(200);
+    expect(report.body.view.kind).toBe("question");
+    expect(detail.body.focusLosses).toEqual([
+      { from: minute(3) - 45_000, to: minute(3), how: "hidden", subject: "Math", questionNumber: 2 },
+      { from: minute(4) - 5_000, to: minute(4), how: "blurred", subject: "Math", questionNumber: 2 },
+    ]);
+    expect(list.body.attempts[0].focusLosses).toEqual({ count: 2, seconds: 50 });
+  });
+
+  test("gaps in the heartbeat while the page was out of focus are not Interruptions", async () => {
+    const { call, clock } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    const beat = async (s: number) => {
+      clock.now = seconds(s);
+      await call("POST", `/api/attempts/${body.attemptId}/heartbeat`);
+    };
+    // Out of focus 15s-200s: the browser slows the page's heartbeat to once a minute.
+    await beat(10);
+    await beat(75);
+    await beat(135);
+    clock.now = seconds(200);
+    await call("POST", `/api/attempts/${body.attemptId}/focus-losses`, { awayMs: 185_000, how: "hidden" });
+    // Out of focus 400s-600s: the browser froze the page, so no heartbeat at all.
+    for (let s = 210; s <= 390; s += 10) await beat(s);
+    await beat(395);
+    clock.now = seconds(600);
+    await call("POST", `/api/attempts/${body.attemptId}/focus-losses`, { awayMs: 200_000, how: "hidden" });
+    // Then the page is really closed.
+    await beat(605);
+    await beat(900);
+
+    const res = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
+
+    expect(res.body.focusLosses.map((f: any) => [f.from, f.to])).toEqual([
+      [seconds(15), seconds(200)],
+      [seconds(400), seconds(600)],
+    ]);
+    expect(res.body.interruptions).toEqual([{ from: seconds(605), to: seconds(900), subject: "Math", questionNumber: 1 }]);
+  });
+
+  test("a Focus Loss never starts before the Attempt, and nonsense reports are refused", async () => {
+    const { call, clock } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    clock.now = minute(1);
+    const path = `/api/attempts/${body.attemptId}/focus-losses`;
+
+    await call("POST", path, { awayMs: 10 * 60_000, how: "blurred" });
+    const refused = await Promise.all([
+      call("POST", path, { awayMs: -5, how: "hidden" }),
+      call("POST", path, { awayMs: "a while", how: "hidden" }),
+      call("POST", path, { awayMs: 5_000, how: "asleep" }),
+    ]);
+    const res = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
+
+    expect(refused.map((r) => r.status)).toEqual([400, 400, 400]);
+    expect(res.body.focusLosses).toEqual([{ from: T0, to: minute(1), how: "blurred", subject: "Math", questionNumber: 1 }]);
+  });
+
+  test("a report after the Attempt has finished is not kept", async () => {
+    const { call, clock } = harness();
+    const { body } = await call("POST", "/api/attempts", { student: "Aisha", setNumber: "7" });
+    clock.now = minute(40); // the Exercise Set ended at 30
+
+    await call("POST", `/api/attempts/${body.attemptId}/focus-losses`, { awayMs: 60_000, how: "hidden" });
+    const res = await call("GET", `/api/parent/attempts/${body.attemptId}`, undefined, PIN);
+
+    expect(res.body.focusLosses).toEqual([]);
+  });
+});
 
 describe("Selected Subjects", () => {
   const PIN = { "x-parent-pin": "4321" };

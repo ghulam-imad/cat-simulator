@@ -79,6 +79,10 @@ _Avoid_: Custom run, partial set
 A period during an Attempt when the Student's page was closed. The clock keeps running through it.
 _Avoid_: Pause, break
 
+**Focus Loss**:
+A period during an Attempt when the Student's page stayed open but something else was in front of it: another tab or app, another window being used, a minimised window or a locked screen. Only when it happened, how long it lasted and which Question was on screen are known, never what the Student looked at. Very short ones are ignored.
+_Avoid_: Blur, tab switch, cheating
+
 **Adaptive Selection**:
 The rule that picks each next Question. It starts with a random Low Question in every Subject, goes one Difficulty up after a correct Response, and goes one down after a wrong or missing one. Each Question comes from that Difficulty's Pool, and none is repeated within an Attempt.
 _Avoid_: Branching, leveling

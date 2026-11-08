@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { api, ApiError, type AttemptDetail, type AttemptListItem, type ReviewedResponse } from "../shared/api";
+import { api, ApiError, type AttemptDetail, type AttemptListItem, type FocusLoss, type ReviewedResponse } from "../shared/api";
 import { Markdown } from "../shared/Markdown";
 import { formatClock, formatDateTime, formatSeconds } from "../shared/time";
 import { DifficultyPathChart, ProgressChart } from "./charts";
@@ -168,6 +168,57 @@ function PartialPill({ skipped }: { skipped: string[] }) {
   );
 }
 
+/** Two overlapping windows: "something else was in front of the page". Drawn, like HalfIcon. */
+function AwayIcon() {
+  return (
+    <svg width="12" height="11" viewBox="0 0 13 12" aria-hidden="true" style={{ flex: "none" }}>
+      <rect x="0.75" y="0.75" width="8" height="6.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="4.25" y="4.75" width="8" height="6.5" rx="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Marks an Attempt whose page was out of focus at times. */
+function FocusLossPill({ count, seconds }: { count: number; seconds: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="pill warn" title={`Total ${formatSeconds(seconds)} di luar halaman ujian`}>
+      <AwayIcon /> Keluar halaman {count}×
+    </span>
+  );
+}
+
+const HOW_LABEL = {
+  hidden: "halaman tidak terlihat: pindah tab atau aplikasi, jendela dikecilkan, atau layar dikunci",
+  blurred: "halaman terlihat, tapi jendela lain sedang dipakai",
+} as const;
+
+function FocusLossCard({ losses }: { losses: FocusLoss[] }) {
+  if (losses.length === 0) return null;
+  const total = losses.reduce((sum, l) => sum + l.to - l.from, 0) / 1000;
+  return (
+    <div className="card">
+      <h3>Keluar dari halaman ujian</h3>
+      <p className="secondary small" style={{ marginTop: 0 }}>
+        {losses.length} kali, total {formatSeconds(total)}. Hanya waktu dan lamanya yang tercatat; apa yang dibuka di luar
+        halaman tidak bisa diketahui.
+      </p>
+      <ul style={{ margin: 0, paddingLeft: 20 }}>
+        {losses.map((l) => (
+          <li key={l.from}>
+            {formatClock(l.from)} – {formatClock(l.to)} ({formatSeconds((l.to - l.from) / 1000)})
+            <span className="secondary">
+              {" "}
+              saat {l.subject}
+              {l.questionNumber ? `, soal ${l.questionNumber}` : " (menunggu subtes dibuka)"} · {HOW_LABEL[l.how]}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function AttemptList({ call }: { call: Call }) {
   const { attempts, error } = useAttempts(call);
   const [student, setStudent] = useState("");
@@ -216,6 +267,7 @@ function AttemptList({ call }: { call: Call }) {
                   <div className="pill-stack">
                     <StatusPill status={a.status} />
                     <PartialPill skipped={a.skippedSubjects} />
+                    <FocusLossPill {...a.focusLosses} />
                   </div>
                 </td>
                 <td className="num">
@@ -330,8 +382,15 @@ function AttemptView({ id, call }: { id: string; call: Call }) {
             </div>
           )}
 
+          <FocusLossCard losses={detail.focusLosses} />
+
           {detail.subjects.map((s) => (
-            <SubjectReview key={s.subject} subject={s} setNumber={detail.setNumber} />
+            <SubjectReview
+              key={s.subject}
+              subject={s}
+              setNumber={detail.setNumber}
+              focusLosses={detail.focusLosses.filter((l) => l.subject === s.subject)}
+            />
           ))}
         </>
       )}
@@ -339,7 +398,15 @@ function AttemptView({ id, call }: { id: string; call: Call }) {
   );
 }
 
-function SubjectReview({ subject, setNumber }: { subject: AttemptDetail["subjects"][number]; setNumber: string }) {
+function SubjectReview({
+  subject,
+  setNumber,
+  focusLosses,
+}: {
+  subject: AttemptDetail["subjects"][number];
+  setNumber: string;
+  focusLosses: FocusLoss[];
+}) {
   const score = subject.responses.reduce((sum, r) => sum + r.points, 0);
   const correct = subject.responses.filter((r) => r.correct).length;
   const lagCount = subject.responses.filter((r) => r.inLag).length;
@@ -364,7 +431,13 @@ function SubjectReview({ subject, setNumber }: { subject: AttemptDetail["subject
       </div>
       <div>
         {subject.responses.map((r, i) => (
-          <ResponseReview key={r.question.id} n={i + 1} response={r} setNumber={setNumber} />
+          <ResponseReview
+            key={r.question.id}
+            n={i + 1}
+            response={r}
+            setNumber={setNumber}
+            focusLosses={focusLosses.filter((l) => l.questionNumber === i + 1)}
+          />
         ))}
       </div>
     </section>
@@ -374,7 +447,18 @@ function SubjectReview({ subject, setNumber }: { subject: AttemptDetail["subject
 const DIFFICULTY_LABEL = { high: "Sulit · 3 poin", medium: "Sedang · 2 poin", low: "Mudah · 1 poin" } as const;
 const letter = (i: number) => "ABCD"[i] ?? "?";
 
-function ResponseReview({ n, response: r, setNumber }: { n: number; response: ReviewedResponse; setNumber: string }) {
+function ResponseReview({
+  n,
+  response: r,
+  setNumber,
+  focusLosses,
+}: {
+  n: number;
+  response: ReviewedResponse;
+  setNumber: string;
+  focusLosses: FocusLoss[];
+}) {
+  const awaySeconds = focusLosses.reduce((sum, l) => sum + l.to - l.from, 0) / 1000;
   const [open, setOpen] = useState(!r.correct);
   // Letters follow the Student's screen (the Options were shuffled), so "you picked B" means what they saw.
   const shownAs = (i: number) => letter(r.optionOrder.indexOf(i));
@@ -394,6 +478,11 @@ function ResponseReview({ n, response: r, setNumber }: { n: number; response: Re
           <span className="secondary small">{DIFFICULTY_LABEL[r.question.difficulty]}</span>
           <span className="spacer" />
           {r.inLag && <span className="pill warn">⏱ Waktu tambahan</span>}
+          {focusLosses.length > 0 && (
+            <span className="pill warn" title="Halaman ujian tidak sedang dipakai selama soal ini tampil">
+              <AwayIcon /> Keluar {focusLosses.length}× · {formatSeconds(awaySeconds)}
+            </span>
+          )}
           <span className="small num secondary">
             {r.points} poin · {formatSeconds(r.secondsSpent)}
           </span>

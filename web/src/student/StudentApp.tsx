@@ -340,6 +340,8 @@ function Start({
 }
 
 const HEARTBEAT_MS = 10_000;
+/** Shorter than this (a stray click, a notification) isn't worth telling the Parent about. */
+const MIN_FOCUS_LOSS_MS = 2_000;
 
 function Exam({ session, initial, onDone }: { session: Session; initial: StudentReply; onDone: () => void }) {
   const [reply, setReply] = useState(initial);
@@ -363,6 +365,55 @@ function Exam({ session, initial, onDone }: { session: Session; initial: Student
   useEffect(() => {
     const id = setInterval(refresh, HEARTBEAT_MS);
     return () => clearInterval(id);
+  }, []);
+
+  // Note each time the page goes out of focus, and report it once the page is back in focus
+  // (or is being closed). The Parent sees when and for how long, never what else was open.
+  const finished = reply.view.kind === "finished";
+  const finishedRef = useRef(finished);
+  finishedRef.current = finished;
+  useEffect(() => {
+    let since: number | undefined;
+    let how: "hidden" | "blurred" = "blurred";
+    const report = (closing: boolean) => {
+      if (since === undefined) return;
+      const awayMs = Date.now() - since;
+      since = undefined;
+      if (awayMs < MIN_FOCUS_LOSS_MS || finishedRef.current) return;
+      fetch(`/api/attempts/${attemptId}/focus-losses`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ awayMs, how }),
+        keepalive: closing,
+      })
+        .then((res) => (res.ok && !closing ? (res.json() as Promise<StudentReply>) : undefined))
+        .then((next) => next && setReply(next))
+        .catch(() => undefined); // lost on a network blip; the heartbeat carries on
+    };
+    const check = () => {
+      const hidden = document.visibilityState === "hidden";
+      if (!hidden && document.hasFocus()) return report(false);
+      if (since === undefined) {
+        since = Date.now();
+        how = hidden ? "hidden" : "blurred";
+      } else if (hidden) {
+        how = "hidden"; // another window first, then this one hidden too
+      }
+    };
+    const closing = () => report(true);
+    window.addEventListener("blur", check);
+    window.addEventListener("focus", check);
+    window.addEventListener("pageshow", check);
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("pagehide", closing);
+    check();
+    return () => {
+      window.removeEventListener("blur", check);
+      window.removeEventListener("focus", check);
+      window.removeEventListener("pageshow", check);
+      document.removeEventListener("visibilitychange", check);
+      window.removeEventListener("pagehide", closing);
+    };
   }, []);
 
   // When a countdown reaches zero, ask the server what comes next.

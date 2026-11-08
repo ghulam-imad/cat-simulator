@@ -1,7 +1,7 @@
 # CAT Simulator
 
 A small practice tool for a child preparing for a Computerized Adaptive Test (CAT).
-The Parent writes Exercise Sets as Markdown files. The Student logs in with their name and an Exercise Set number and works through timed, adaptive multiple-choice Subjects. Every answer, tick, timing and interruption is logged so Parent and Student can review the Attempt together afterwards.
+The Parent writes Exercise Sets as Markdown files. The Student logs in with their name and an Exercise Set number and works through timed, adaptive multiple-choice Subjects. Every answer, tick, timing, interruption and switch away from the page is logged so Parent and Student can review the Attempt together afterwards.
 
 Everything runs on one home computer and is reachable only from devices on the home Wi-Fi. There's no cloud and no accounts.
 
@@ -186,7 +186,7 @@ Once an Exercise Set has been attempted, fix typos only. Changing Questions or a
 Behind a Parent PIN, the review shows:
 
 - **All Attempts**, newest first, with status, total Score and the Score for each Subject. An Attempt that ran only some Subjects is marked **Subtes terpilih**, and its page lists the Subjects it skipped. On the Progress tab its total is marked too, since it can't be compared with a full run.
-- **One Attempt in detail:** for every Response, the Question, what was picked, the Correct Options, points, time spent, whether it was given during Lag, and how the ticks changed before submitting. Each Subject also shows its Difficulty Path and whether it Timed Out. **Interruptions** (when the page was closed) are listed with the Subject and Question number.
+- **One Attempt in detail:** for every Response, the Question, what was picked, the Correct Options, points, time spent, whether it was given during Lag, and how the ticks changed before submitting. Each Subject also shows its Difficulty Path and whether it Timed Out. **Interruptions** (when the page was closed) are listed with the Subject and Question number. So are **Focus Losses**: times the page stayed open but something else was in front of it (another tab or app, another window being used, a locked screen). Each shows when, how long, and which Question was on screen, and the Question gets a "Keluar" pill. The browser can't say what the Student looked at, only when and for how long. Focus Losses under 2 seconds are ignored, and the Student isn't shown anything about them. The Attempt list marks Attempts that had any.
 - **Discard**: an in-progress Attempt can be thrown away.
 
 ## Development

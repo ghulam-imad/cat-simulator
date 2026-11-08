@@ -41,6 +41,8 @@ export interface AttemptListItem {
   score: number;
   /** Subjects of the Exercise Set this Attempt left out; empty when it ran them all. */
   skippedSubjects: string[];
+  /** How often the Student's page was out of focus, and for how long in all. */
+  focusLosses: { count: number; seconds: number };
   subjects: { subject: string; score: number; correct: number }[];
 }
 
@@ -57,6 +59,19 @@ export interface ReviewedResponse {
   selectionChanges: { selected: number[]; at: number }[];
 }
 
+/**
+ * The Student's page stayed open but wasn't in front. `hidden`: it couldn't be seen (another tab or app,
+ * minimised, screen locked). `blurred`: it could be seen, but another window was being used.
+ */
+export interface FocusLoss {
+  from: number;
+  to: number;
+  how: "hidden" | "blurred";
+  subject: string;
+  /** Which Question of the Subject was on screen; absent if the Student was waiting for the Subject to open. */
+  questionNumber?: number;
+}
+
 export interface AttemptDetail {
   attemptId: string;
   student: string;
@@ -64,6 +79,7 @@ export interface AttemptDetail {
   startedAt: number;
   skippedSubjects: string[];
   interruptions: { from: number; to: number; subject: string; questionNumber?: number }[];
+  focusLosses: FocusLoss[];
   subjects: { subject: string; timedOut: boolean; difficultyPath: Difficulty[]; responses: ReviewedResponse[] }[];
 }
 

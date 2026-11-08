@@ -6,7 +6,7 @@ import { loadExerciseSet, setName } from "../content/load-exercise-set.js";
 import { type Attempt, changeSelection, reviewAt, startAttempt, submitResponse, type View, viewAt } from "../engine/attempt.js";
 import type { ExerciseSet } from "../engine/exercise-set.js";
 import { selectSubjects } from "../engine/select-subjects.js";
-import { type AttemptRow, AttemptStore } from "./attempt-store.js";
+import { type AttemptRow, AttemptStore, type FocusLossRow } from "./attempt-store.js";
 
 export interface AppOptions {
   db: DatabaseSync;
@@ -58,15 +58,30 @@ export function createApp(opts: AppOptions) {
       optionSeed: row.optionSeed,
     });
     const interruptions: Interruption[] = [];
+    const losses = store.focusLosses(row.id);
+    const focusLosses: FocusLoss[] = [];
+    /** Places each Focus Loss that began before `at`, where the Student was when it began. */
+    const placeFocusLossesBefore = (at: number) => {
+      while (focusLosses.length < losses.length && losses[focusLosses.length]!.from < at) {
+        const loss = losses[focusLosses.length]!;
+        focusLosses.push({ ...loss, ...whereAt(attempt, loss.from) });
+      }
+    };
+    // A browser slows or freezes a page that's out of focus, so its heartbeat can stop
+    // (or start late, just before the page went out of focus); the page was open all the same.
+    const outOfFocus = (from: number, to: number) =>
+      losses.some((loss) => loss.from - INTERRUPTION_GAP_MS <= from && to <= loss.to);
     let lastActivity = row.startedAt;
     for (const event of store.events(row.id)) {
-      if (event.at - lastActivity > INTERRUPTION_GAP_MS) {
+      placeFocusLossesBefore(event.at);
+      if (event.at - lastActivity > INTERRUPTION_GAP_MS && !outOfFocus(lastActivity, event.at)) {
         interruptions.push({ from: lastActivity, to: event.at, ...whereAt(attempt, lastActivity) });
       }
       lastActivity = event.at;
       if (event.kind === "response") attempt = submitResponse(attempt, event.selected, event.at);
       if (event.kind === "selection") attempt = changeSelection(attempt, event.selected, event.at);
     }
+    placeFocusLossesBefore(Infinity);
     // Closed and never reopened before the Exercise Set ran out (finishing every Question ends it sooner, with no gap).
     const endsAt = setEndsAt(attempt);
     if (attempt.cursor !== "finished" && now() >= endsAt && endsAt - lastActivity > INTERRUPTION_GAP_MS) {
@@ -75,7 +90,7 @@ export function createApp(opts: AppOptions) {
     const saveDraws = () => {
       if (values.length > row.randomValues.length) store.saveRandomValues(row.id, values);
     };
-    return { attempt, saveDraws, interruptions };
+    return { attempt, saveDraws, interruptions, focusLosses };
   };
 
   /** What the Student's page receives: the View (answers removed), the server's time, and when the Exercise Set ends. */
@@ -208,6 +223,23 @@ export function createApp(opts: AppOptions) {
     return c.json(studentReply(rebuild(store.get(id)!).attempt));
   });
 
+  /** The page reports, once it's back in focus, how long it was out of focus and how. It counts as a heartbeat too. */
+  app.post("/api/attempts/:id/focus-losses", async (c) => {
+    const id = c.req.param("id");
+    const { awayMs, how } = await c.req.json<{ awayMs: unknown; how: unknown }>();
+    if (typeof awayMs !== "number" || !Number.isFinite(awayMs) || awayMs < 0 || (how !== "hidden" && how !== "blurred")) {
+      return c.json({ error: "A Focus Loss needs awayMs (0 or more) and how (hidden or blurred)." }, 400);
+    }
+    const row = store.get(id)!;
+    const to = now();
+    const from = Math.max(row.startedAt, to - Math.round(awayMs));
+    store.append(id, { kind: "heartbeat", at: to });
+    const { attempt } = rebuild(row);
+    // Out of focus after the Attempt ended (on the Finished screen) tells the Parent nothing.
+    if (viewAt(attempt, from).kind !== "finished") store.addFocusLoss(id, { from, to, how });
+    return c.json(studentReply(attempt));
+  });
+
   app.post("/api/attempts/:id/responses", act("response"));
   app.post("/api/attempts/:id/selection", act("selection"));
 
@@ -233,6 +265,10 @@ export function createApp(opts: AppOptions) {
           status: viewAt(attempt, now()).kind === "finished" ? "finished" : "in progress",
           score: subjects.reduce((sum, s) => sum + s.score, 0),
           skippedSubjects: skippedSubjects(row),
+          focusLosses: (() => {
+            const losses = store.focusLosses(row.id);
+            return { count: losses.length, seconds: Math.round(losses.reduce((sum, l) => sum + l.to - l.from, 0) / 1000) };
+          })(),
           subjects,
         };
       }),
@@ -242,9 +278,10 @@ export function createApp(opts: AppOptions) {
   app.get("/api/parent/attempts/:id", (c) => {
     const row = store.get(c.req.param("id"));
     if (!row) return c.json({ error: "No such Attempt." }, 404);
-    const { attempt, interruptions } = rebuild(row);
+    const { attempt, interruptions, focusLosses } = rebuild(row);
     return c.json({
       interruptions,
+      focusLosses,
       attemptId: row.id,
       student: row.student,
       setNumber: row.setNumber,
@@ -282,6 +319,9 @@ interface Interruption {
   /** Which Question of the Subject was on screen; absent if the Student was waiting for the Subject to open. */
   questionNumber?: number;
 }
+
+/** A Focus Loss, placed where the Student was when it began. */
+type FocusLoss = FocusLossRow & { subject: string; questionNumber?: number };
 
 /** The Subject and Question number the Student was on at time `at`. */
 function whereAt(attempt: Attempt, at: number): { subject: string; questionNumber?: number } {
